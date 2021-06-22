@@ -1,7 +1,6 @@
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
+using Elasticsearch.Net;
 using FluentValidation.AspNetCore;
-using Hackney.Core.DynamoDb;
-using Hackney.Core.DynamoDb.HealthCheck;
 using Hackney.Core.HealthCheck;
 using Hackney.Core.Logging;
 using Hackney.Core.Middleware.CorrelationId;
@@ -15,9 +14,12 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Nest;
+using ReferenceDataApi.HealthCheck;
 using ReferenceDataApi.V1.Gateways;
 using ReferenceDataApi.V1.Infrastructure;
 using ReferenceDataApi.V1.UseCase;
@@ -65,8 +67,6 @@ namespace ReferenceDataApi
             });
 
             services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
-
-            services.AddDynamoDbHealthCheck<ReferenceDataDb>();
 
             services.AddSwaggerGen(c =>
             {
@@ -127,21 +127,34 @@ namespace ReferenceDataApi
 
             services.ConfigureLambdaLogging(Configuration);
             services.AddLogCallAspect();
-            services.ConfigureDynamoDB();
+            ConfigureElasticsearch(services);
 
             RegisterGateways(services);
             RegisterUseCases(services);
         }
 
+        private static void ConfigureElasticsearch(IServiceCollection services)
+        {
+            var url = Environment.GetEnvironmentVariable("ELASTICSEARCH_DOMAIN_URL") ?? "http://localhost:9200";
+            var pool = new SingleNodeConnectionPool(new Uri(url));
+            var connectionSettings =
+                new ConnectionSettings(pool)
+                    .PrettyJson().ThrowExceptions().DisableDirectStreaming();
+            var esClient = new ElasticClient(connectionSettings);
+
+            services.TryAddSingleton<IElasticClient>(esClient);
+
+            services.AddElasticSearchHealthCheck();
+        }
+
         private static void RegisterGateways(IServiceCollection services)
         {
-            services.AddScoped<IExampleGateway, DynamoDbGateway>();
+            services.AddScoped<IExampleGateway, ElasticSearchGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetAllUseCase, GetAllUseCase>();
-            services.AddScoped<IGetByIdUseCase, GetByIdUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

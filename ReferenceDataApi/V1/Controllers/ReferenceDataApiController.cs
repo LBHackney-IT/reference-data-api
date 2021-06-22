@@ -14,11 +14,10 @@ namespace ReferenceDataApi.V1.Controllers
     public class ReferenceDataApiController : BaseController
     {
         private readonly IGetAllUseCase _getAllUseCase;
-        private readonly IGetByIdUseCase _getByIdUseCase;
-        public ReferenceDataApiController(IGetAllUseCase getAllUseCase, IGetByIdUseCase getByIdUseCase)
+
+        public ReferenceDataApiController(IGetAllUseCase getAllUseCase)
         {
             _getAllUseCase = getAllUseCase;
-            _getByIdUseCase = getByIdUseCase;
         }
 
         //TODO: add xml comments containing information that will be included in the auto generated swagger docs (https://github.com/LBHackney-IT/lbh-reference-data-api/wiki/Controllers-and-Response-Objects)
@@ -32,20 +31,6 @@ namespace ReferenceDataApi.V1.Controllers
         public IActionResult ListContacts()
         {
             return Ok(_getAllUseCase.Execute());
-        }
-
-        /// <summary>
-        /// ...
-        /// </summary>
-        /// <response code="200">...</response>
-        /// <response code="404">No ? found for the specified ID</response>
-        [ProducesResponseType(typeof(ResponseObject), StatusCodes.Status200OK)]
-        [HttpGet]
-        //TODO: rename to match the identifier that will be used
-        [Route("{yourId}")]
-        public IActionResult ViewRecord(int yourId)
-        {
-            return Ok(_getByIdUseCase.Execute(yourId));
         }
     }
 }

@@ -5,8 +5,6 @@ namespace ReferenceDataApi.V1.Gateways
 {
     public interface IExampleGateway
     {
-        ReferenceData GetEntityById(int id);
-
         List<ReferenceData> GetAll();
     }
 }

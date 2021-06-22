@@ -36,3 +36,46 @@ terraform {
     key     = services/reference-data-api/state
   }
 }
+
+
+/*    ELASTICSEARCH SETUP    */
+
+data "aws_vpc" "staging_vpc" {
+  tags = {
+    Name = "vpc-housing-staging"
+  }
+}
+
+data "aws_subnet_ids" "staging" {
+  vpc_id = data.aws_vpc.staging_vpc.id
+  filter {
+    name   = "tag:Type"
+    values = ["private"]
+  }
+}
+
+module "elasticsearch_db_staging" {
+  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/database/elasticsearch"
+  vpc_id           = data.aws_vpc.staging_vpc.id
+  environment_name = "staging"
+  port             = 443
+  domain_name      = "reference-data-api-es"
+  subnet_ids       = [tolist(data.aws_subnet_ids.staging.ids)[0]]
+  project_name     = "reference-data-api"
+  es_version       = "7.8"
+  encrypt_at_rest  = "false"
+  instance_type    = "t3.small.elasticsearch"
+  instance_count   = "1"
+  ebs_enabled      = "true"
+  ebs_volume_size  = "10"
+  region           = data.aws_region.current.name
+  account_id       = data.aws_caller_identity.current.account_id
+}
+
+/*
+resource "aws_ssm_parameter" "search_elasticsearch_domain" {
+  name = "/reference-data-api/staging/elasticsearch-domain"
+  type = "String"
+  value = "https://vpc-housing-search-api-es-7royucdycdim5wkm37s6neti5i.eu-west-2.es.amazonaws.com"
+}
+*/
