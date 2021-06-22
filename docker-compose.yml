@@ -1,64 +1,61 @@
 version: "3.2"
 
 services:
-  base-api:
-    image: base-api
+  reference-data-api:
+    image: reference-data-api
     build:
-      context: BaseApi/
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: ReferenceDataApi/Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     ports:
       - 3000:3000
-    environment:
-      - CONNECTION_STRING=Host=dev-database;Port=5432;Database=testdb;Username=postgres;Password=mypassword
-# TODO: If using DynamoDb remove the line above and uncomment the section below.
-#      - DynamoDb_LocalMode=true
-#      - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
-#      - AWS_REGION=eu-west-2
-#      - AWS_ACCESS_KEY_ID=local
-#      - AWS_SECRET_ACCESS_KEY=local
-    links:
-      - dev-database
-  dev-database:
-    env_file:
-      - database.env
-    image: postgres:12
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d
+    depends_on:
+        - kibana
 
-  base-api-test:
-    image: base-api-test
+  reference-data-api-test:
+    image: reference-data-api-test
     build:
       context: .
-      dockerfile: BaseApi.Tests/Dockerfile
-    environment:
-      - DB_HOST=test-database
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=mypassword
-      - DB_DATABASE=testdb
-# TODO: If using DynamoDb remove the line above and uncomment the section below.
-#      - DynamoDb_LocalMode=true
-#      - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
-#      - AWS_REGION=eu-west-2
-#      - AWS_ACCESS_KEY_ID=local
-#      - AWS_SECRET_ACCESS_KEY=local
-    links:
-      - test-database
-# TODO: If using DynamoDb remove the line above and uncomment the line below.
-#      - dynamodb-database
-
-  test-database:
-    image: test-database
+      dockerfile: ReferenceDataApi.Tests/Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+    depends_on:
+        - kibana
+      
+  reference-data-elasticsearch:
+    image: reference-data-elasticsearch
+    container_name: reference-data-elasticsearch
     build:
       context: .
-      dockerfile: database/Dockerfile
+      dockerfile: data/elasticsearch/Dockerfile
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - 5432:5432
-    env_file:
-      - database.env
-
-# TODO: If using DynamoDb remove the 'test-database' seciton above and uncomment the lines below.
-#  dynamodb-database:
-#    image: amazon/dynamodb-local
-#    ports:
-#      - 8000:8000
+      - 9200:9200
+    volumes:
+      - reference-data-esdata-test:/usr/share/elasticsearch/data
+    networks:
+      elastic:
+        aliases:
+          - reference-data-elasticsearch
+          - elastic
+          - elasticsearch
+  kibana:
+        image: docker.elastic.co/kibana/kibana:7.9.3
+        ports:
+            - "5601:5601"
+        networks:
+            - elastic
+        depends_on:
+            - reference-data-elasticsearch
+        
+volumes:
+    reference-data-esdata-test:
+        driver: local
+networks:
+  elastic:
+    driver: bridge

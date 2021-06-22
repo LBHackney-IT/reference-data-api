@@ -7,56 +7,75 @@
 # 6) IF ADDITIONAL RESOURCES ARE REQUIRED BY YOUR API, ADD THEM TO THIS FILE
 # 7) ENSURE THIS FILE IS PLACED WITHIN A 'terraform' FOLDER LOCATED AT THE ROOT PROJECT DIRECTORY
 
+terraform {
+    required_providers {
+        aws = {
+            source  = "hashicorp/aws"
+            version = "~> 3.0"
+        }
+    }
+}
+
 provider "aws" {
-  region  = "eu-west-2"
-  version = "~> 2.0"
+    region = "eu-west-2"
 }
+
 data "aws_caller_identity" "current" {}
+
 data "aws_region" "current" {}
+
 locals {
-  application_name = your application name # The name to use for your application
-   parameter_store = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter"
-}
-
-
-data "aws_iam_role" "ec2_container_service_role" {
-  name = "ecsServiceRole"
-}
-
-data "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
+    parameter_store = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter"
 }
 
 terraform {
   backend "s3" {
-    bucket  = "terraform-state-development-apis"
+    bucket  = "terraform-state-housing-development"
     encrypt = true
     region  = "eu-west-2"
-    key     = services/YOUR API NAME/state #e.g. "services/transactions-api/state"
+    key     = services/reference-data-api/state
   }
 }
 
-module "development" {
-  # Delete as appropriate:
-  source                      = "github.com/LBHackney-IT/aws-hackney-components-per-service-terraform.git//modules/environment/backend/fargate"
-  # source = "github.com/LBHackney-IT/aws-hackney-components-per-service-terraform.git//modules/environment/backend/ec2"
-  cluster_name                = "development-apis"
-  ecr_name                    = ecr repository name # Replace with your repository name - pattern: "hackney/YOUR APP NAME"
-  environment_name            = "development"
-  application_name            = local.application_name 
-  security_group_name         = back end security group name # Replace with your security group name, WITHOUT SPECIFYING environment. Usually the SG has the name of your API
-  vpc_name                    = "vpc-development-apis"
-  host_port                   = port # Replace with the port to use for your api / app
-  port                        = port # Replace with the port to use for your api / app
-  desired_number_of_ec2_nodes = number of nodes # Variable will only be used if EC2 is required. Do not remove it. 
-  lb_prefix                   = "nlb-development-apis"
-  ecs_execution_role          = data.aws_iam_role.ecs_task_execution_role.arn
-  lb_iam_role_arn             = data.aws_iam_role.ec2_container_service_role.arn
-  task_definition_environment_variables = {
-    ASPNETCORE_ENVIRONMENT = "development"
+/*    ELASTICSEARCH SETUP    */
+
+data "aws_vpc" "development_vpc" {
+  tags = {
+    Name = "vpc-housing-development"
   }
-  task_definition_environment_variable_count = number # This number needs to reflect the number of environment variables provided
-  cost_code = your project's cost code
-  task_definition_secrets      = {}
-  task_definition_secret_count = number # This number needs to reflect the number of environment variables provided
 }
+
+data "aws_subnet_ids" "development" {
+  vpc_id = data.aws_vpc.development_vpc.id
+  filter {
+    name   = "tag:Type"
+    values = ["private"]
+  }
+}
+
+module "elasticsearch_db_development" {
+  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/database/elasticsearch"
+  vpc_id           = data.aws_vpc.development_vpc.id
+  environment_name = "development"
+  port             = 443
+  domain_name      = "reference-data-api-es"
+  subnet_ids       = [tolist(data.aws_subnet_ids.development.ids)[0]]
+  project_name     = "reference-data-api"
+  es_version       = "7.8"
+  encrypt_at_rest  = "false"
+  instance_type    = "t3.small.elasticsearch"
+  instance_count   = "1"
+  ebs_enabled      = "true"
+  ebs_volume_size  = "10"
+  region           = data.aws_region.current.name
+  account_id       = data.aws_caller_identity.current.account_id
+}
+
+/*
+resource "aws_ssm_parameter" "search_elasticsearch_domain" {
+  name = "/reference-data-api/development/elasticsearch-domain"
+  type = "String"
+  value = "https://vpc-housing-search-api-es-klp5oycl6thlxaub2mzu5zlj5u.eu-west-2.es.amazonaws.com"
+}
+*/
+
