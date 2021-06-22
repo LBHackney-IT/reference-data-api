@@ -55,27 +55,28 @@ data "aws_subnet_ids" "production" {
 }
 
 module "elasticsearch_db_production" {
-  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/database/elasticsearch"
-  vpc_id           = data.aws_vpc.production_vpc.id
-  environment_name = "production"
-  port             = 443
-  domain_name      = "reference-data-api-es"
-  subnet_ids       = [tolist(data.aws_subnet_ids.production.ids)[0]]
-  project_name     = "reference-data-api"
-  es_version       = "7.8"
-  encrypt_at_rest  = "false"
-  instance_type    = "t3.small.elasticsearch"
-  instance_count   = "1"
-  ebs_enabled      = "true"
-  ebs_volume_size  = "10"
-  region           = data.aws_region.current.name
-  account_id       = data.aws_caller_identity.current.account_id
+  source                = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/database/elasticsearch"
+  vpc_id                = data.aws_vpc.production_vpc.id
+  environment_name      = "production"
+  port                  = 443
+  domain_name           = "reference-data-api-es"
+  subnet_ids            = data.aws_subnet_ids.development.ids
+  project_name          = "reference-data-api"
+  es_version            = "7.8"
+  encrypt_at_rest       = "false"
+  instance_type         = "t3.small.elasticsearch"
+  instance_count        = "2"
+  ebs_enabled           = "true"
+  ebs_volume_size       = "30"
+  region                = data.aws_region.current.name
+  account_id            = data.aws_caller_identity.current.account_id
+  create_service_role   = false
 }
 
-/*
+
 resource "aws_ssm_parameter" "search_elasticsearch_domain" {
   name = "/reference-data-api/production/elasticsearch-domain"
   type = "String"
-  value = "https://vpc-housing-search-api-es-cggwz5gia7iqw6kxw64ytgrmr4.eu-west-2.es.amazonaws.com"
+  value = module.elasticsearch_db_production.es_endpoint_url
 }
-*/
+
