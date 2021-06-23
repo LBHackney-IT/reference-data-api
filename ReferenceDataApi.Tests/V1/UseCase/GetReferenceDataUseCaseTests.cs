@@ -11,16 +11,16 @@ using Xunit;
 
 namespace ReferenceDataApi.Tests.V1.UseCase
 {
-    public class GetAllUseCaseTests
+    public class GetReferenceDataUseCaseTests
     {
-        private readonly Mock<IExampleGateway> _mockGateway;
-        private readonly GetAllUseCase _classUnderTest;
+        private readonly Mock<IReferenceDataGateway> _mockGateway;
+        private readonly GetReferenceDataUseCase _classUnderTest;
         private readonly Fixture _fixture;
 
-        public GetAllUseCaseTests()
+        public GetReferenceDataUseCaseTests()
         {
-            _mockGateway = new Mock<IExampleGateway>();
-            _classUnderTest = new GetAllUseCase(_mockGateway.Object);
+            _mockGateway = new Mock<IReferenceDataGateway>();
+            _classUnderTest = new GetReferenceDataUseCase(_mockGateway.Object);
             _fixture = new Fixture();
         }
 

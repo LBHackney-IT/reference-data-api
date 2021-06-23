@@ -1,10 +1,13 @@
 using Microsoft.Extensions.Logging;
 using Nest;
+using ReferenceDataApi.V1.Boundary.Request;
+using ReferenceDataApi.V1.Domain;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReferenceDataApi.V1.Gateways
 {
-    public class ElasticSearchGateway : IExampleGateway
+    public class ElasticSearchGateway : IReferenceDataGateway
     {
         private readonly IElasticClient _esClient;
         private readonly ILogger<ElasticSearchGateway> _logger;
@@ -15,9 +18,9 @@ namespace ReferenceDataApi.V1.Gateways
             _logger = logger;
         }
 
-        public List<Domain.ReferenceData> GetAll()
+        public async Task<List<ReferenceData>> GetReferenceDataAsync(GetReferenceDataQuery query)
         {
-            return new List<Domain.ReferenceData>();
+            return await Task.FromResult(new List<ReferenceData>());
         }
     }
 }

@@ -137,11 +137,10 @@ namespace ReferenceDataApi
         {
             var url = Environment.GetEnvironmentVariable("ELASTICSEARCH_DOMAIN_URL") ?? "http://localhost:9200";
             var pool = new SingleNodeConnectionPool(new Uri(url));
-            var connectionSettings =
-                new ConnectionSettings(pool)
-                    .PrettyJson().ThrowExceptions().DisableDirectStreaming();
+            var connectionSettings = new ConnectionSettings(pool).PrettyJson()
+                                                                 .ThrowExceptions()
+                                                                 .DisableDirectStreaming();
             var esClient = new ElasticClient(connectionSettings);
-
             services.TryAddSingleton<IElasticClient>(esClient);
 
             services.AddElasticSearchHealthCheck();
@@ -149,12 +148,12 @@ namespace ReferenceDataApi
 
         private static void RegisterGateways(IServiceCollection services)
         {
-            services.AddScoped<IExampleGateway, ElasticSearchGateway>();
+            services.AddScoped<IReferenceDataGateway, ElasticSearchGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
-            services.AddScoped<IGetAllUseCase, GetAllUseCase>();
+            services.AddScoped<IGetReferenceDataUseCase, GetReferenceDataUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
