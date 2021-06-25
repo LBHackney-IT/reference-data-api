@@ -15,21 +15,21 @@ namespace ReferenceDataApi.V1.Controllers
     [ApiVersion("1.0")]
     public class ReferenceDataApiController : BaseController
     {
-        private readonly IGetReferenceDataUseCase _getAllUseCase;
+        private readonly IGetReferenceDataUseCase _getRefDataUseCase;
 
-        public ReferenceDataApiController(IGetReferenceDataUseCase getAllUseCase)
+        public ReferenceDataApiController(IGetReferenceDataUseCase getRefDataUseCase)
         {
-            _getAllUseCase = getAllUseCase;
+            _getRefDataUseCase = getRefDataUseCase;
         }
 
-        [ProducesResponseType(typeof(ResponseObjectList), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseObjectList), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ResponseObjectList), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ReferenceDataResponseObject), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ReferenceDataResponseObject), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ReferenceDataResponseObject), StatusCodes.Status500InternalServerError)]
         [HttpGet, MapToApiVersion("1")]
         [LogCall(LogLevel.Information)]
         public async Task<IActionResult> GetReferenceDataAsync(GetReferenceDataQuery query)
         {
-            return Ok(await _getAllUseCase.ExecuteAsync(query));
+            return Ok(await _getRefDataUseCase.ExecuteAsync(query));
         }
     }
 }

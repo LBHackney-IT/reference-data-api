@@ -6,6 +6,6 @@ namespace ReferenceDataApi.V1.UseCase.Interfaces
 {
     public interface IGetReferenceDataUseCase
     {
-        Task<ResponseObjectList> ExecuteAsync(GetReferenceDataQuery query);
+        Task<ReferenceDataResponseObject> ExecuteAsync(GetReferenceDataQuery query);
     }
 }

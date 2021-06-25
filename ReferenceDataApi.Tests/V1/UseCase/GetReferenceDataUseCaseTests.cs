@@ -24,16 +24,6 @@ namespace ReferenceDataApi.Tests.V1.UseCase
             _fixture = new Fixture();
         }
 
-        [Fact]
-        public void GetsAllFromTheGateway()
-        {
-            var stubbedEntities = _fixture.CreateMany<ReferenceData>().ToList();
-            _mockGateway.Setup(x => x.GetAll()).Returns(stubbedEntities);
-
-            var expectedResponse = new ResponseObjectList { ResponseObjects = stubbedEntities.ToResponse() };
-
-            _classUnderTest.Execute().Should().BeEquivalentTo(expectedResponse);
-        }
 
         //TODO: Add extra tests here for extra functionality added to the use case
     }

@@ -7,16 +7,16 @@ namespace ReferenceDataApi.V1.Factories
 {
     public static class ResponseFactory
     {
-        //TODO: Map the fields in the domain object(s) to fields in the response object(s).
-        // More information on this can be found here https://github.com/LBHackney-IT/lbh-reference-data-api/wiki/Factory-object-mappings
-        public static ResponseObject ToResponse(this ReferenceData domain)
+        public static ReferenceDataResponseObject ToResponse(this IEnumerable<ReferenceData> refDataList)
         {
-            return new ResponseObject();
-        }
-
-        public static List<ResponseObject> ToResponse(this IEnumerable<ReferenceData> domainList)
-        {
-            return domainList.Select(domain => domain.ToResponse()).ToList();
+            var response = new ReferenceDataResponseObject();
+            foreach (var subCategory in refDataList.OrderBy(y => y.SubCategory).Select(x => x.SubCategory).Distinct())
+            {
+                response.Add(subCategory, refDataList.Where(x => x.SubCategory == subCategory)
+                                                     .OrderBy(y => y.Value)
+                                                     .ToList());
+            }
+            return response;
         }
     }
 }

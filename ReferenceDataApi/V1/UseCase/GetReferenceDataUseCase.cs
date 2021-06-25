@@ -15,9 +15,10 @@ namespace ReferenceDataApi.V1.UseCase
             _gateway = gateway;
         }
 
-        public async Task<ResponseObjectList> ExecuteAsync(GetReferenceDataQuery query)
+        public async Task<ReferenceDataResponseObject> ExecuteAsync(GetReferenceDataQuery query)
         {
-            return new ResponseObjectList { ResponseObjects = await _gateway.GetReferenceDataAsync(query).ToResponse() });
+            var refDataResults = await _gateway.GetReferenceDataAsync(query).ConfigureAwait(false);
+            return refDataResults.ToResponse();
         }
     }
 }
