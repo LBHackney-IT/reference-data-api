@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using ReferenceDataApi.V1.Boundary.Response;
 using ReferenceDataApi.V1.Domain;
 
@@ -7,16 +8,19 @@ namespace ReferenceDataApi.V1.Factories
 {
     public static class ResponseFactory
     {
-        public static ReferenceDataResponseObject ToResponse(this IEnumerable<ReferenceData> refDataList)
+        public static ReferenceDataResponseObject ToResponse(this ReferenceData domain)
         {
-            var response = new ReferenceDataResponseObject();
-            foreach (var subCategory in refDataList.OrderBy(y => y.SubCategory).Select(x => x.SubCategory).Distinct())
+            if (domain == null) return null;
+
+            return new ReferenceDataResponseObject
             {
-                response.Add(subCategory, refDataList.Where(x => x.SubCategory == subCategory)
-                                                     .OrderBy(y => y.Value)
-                                                     .ToList());
-            }
-            return response;
+                SubCategory = domain.SubCategory
+            };
+        }
+        public static List<ReferenceDataResponseObject> ToResponse(this IEnumerable<ReferenceData> domainList)
+        {
+            if (null == domainList) return new List<ReferenceDataResponseObject>();
+            return domainList.Select(domain => domain.ToResponse()).ToList();
         }
     }
 }
