@@ -12,7 +12,7 @@ namespace ReferenceDataApi.Tests.V1.Factories
         //TODO: add assertions for all the fields being mapped in `EntityFactory.ToDomain()`. Also be sure to add test cases for
         // any edge cases that might exist.
         [Fact(Skip = "TODO")]
-        
+
         public void CanMapADatabaseEntityToADomainObject()
         {
             var databaseEntity = _fixture.Create<ReferenceDataApi.V1.Infrastructure.ReferenceDataDb>();
