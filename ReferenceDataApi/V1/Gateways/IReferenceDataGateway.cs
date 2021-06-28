@@ -7,6 +7,6 @@ namespace ReferenceDataApi.V1.Gateways
 {
     public interface IReferenceDataGateway
     {
-        Task<List<ReferenceData>> GetReferenceDataAsync(GetReferenceDataQuery query);
+        Task<ReferenceData> GetReferenceDataAsync(GetReferenceDataQuery query);
     }
 }

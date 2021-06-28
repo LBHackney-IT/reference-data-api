@@ -18,9 +18,9 @@ namespace ReferenceDataApi.V1.Gateways
             _logger = logger;
         }
 
-        public async Task<List<ReferenceData>> GetReferenceDataAsync(GetReferenceDataQuery query)
+        public async Task<ReferenceData> GetReferenceDataAsync(GetReferenceDataQuery query)
         {
-            return await Task.FromResult(new List<ReferenceData>());
+            return await Task.FromResult(new ReferenceData());
         }
     }
 }
