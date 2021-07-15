@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ReferenceDataApi.V1.Boundary.Request;
 using ReferenceDataApi.V1.Controllers;
+using ReferenceDataApi.V1.Domain;
+using ReferenceDataApi.V1.Factories;
 using ReferenceDataApi.V1.UseCase.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ using Xunit;
 
 namespace ReferenceDataApi.Tests.V1.Controllers
 {
+    [Collection("LogCall collection")]
     public class ReferenceDataApiControllerTests
     {
         private readonly Mock<IGetReferenceDataUseCase> _mockUseCase;
@@ -33,30 +36,24 @@ namespace ReferenceDataApi.Tests.V1.Controllers
             };
         }
 
-        //[Fact]
-        //public async Task GetReferenceDataAsyncNotFoundReturnsNotFound()
-        //{
-        //    var queryParam = CreateQuery();
-        //    _mockUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((ResponseObjectList) null);
+        [Fact]
+        public async Task GetReferenceDataAsyncReturnsResponse()
+        {
+            var queryParam = CreateQuery();
 
-        //    var response = await _sut.GetReferenceDataAsync(queryParam).ConfigureAwait(false);
-        //    response.Should().BeOfType(typeof(NotFoundObjectResult));
-        //    //(response as NotFoundObjectResult).Value.Should().Be(cqp.TargetId);
-        //}
+            var refData = _fixture.Build<ReferenceData>()
+                                  .With(x => x.Category, Category)
+                                  .With(x => x.SubCategory, _fixture.Create<string>())
+                                  .CreateMany(5);
+            var responseList = refData.ToResponse();
+            _mockUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync(responseList);
 
-        //[Fact]
-        //public async Task GetReferenceDataAsyncReturnsOkResponse()
-        //{
-        //    var queryParam = CreateQuery();
-        //    var responseList = _fixture.Create<ResponseObjectList>();
-        //    _mockUseCase.Setup(x => x.ExecuteAsync(queryParam)).ReturnsAsync((responseList));
+            var response = await _sut.GetReferenceDataAsync(queryParam).ConfigureAwait(false);
+            response.Should().BeOfType(typeof(OkObjectResult));
+            (response as OkObjectResult).Value.Should().BeEquivalentTo(responseList);
+        }
 
-        //    var response = await _sut.GetReferenceDataAsync(queryParam).ConfigureAwait(false);
-        //    responseList.Should().BeOfType(typeof(OkObjectResult));
-        //    //(responseList as OkObjectResult).Value.Should().BeEquivalentTo(new GetContactDetailsResponse(responseList));
-        //}
-
-        [Fact(Skip = "TODO")]
+        [Fact]
         public void GetReferenceDataAsyncThrowsException()
         {
             var queryParam = CreateQuery();

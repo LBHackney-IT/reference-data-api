@@ -1,3 +1,4 @@
+using Hackney.Core.Logging;
 using ReferenceDataApi.V1.Boundary.Request;
 using ReferenceDataApi.V1.Boundary.Response;
 using ReferenceDataApi.V1.Factories;
@@ -15,6 +16,7 @@ namespace ReferenceDataApi.V1.UseCase
             _gateway = gateway;
         }
 
+        [LogCall]
         public async Task<ReferenceDataResponseObject> ExecuteAsync(GetReferenceDataQuery query)
         {
             var refDataResults = await _gateway.GetReferenceDataAsync(query).ConfigureAwait(false);

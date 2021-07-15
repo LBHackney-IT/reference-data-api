@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace ReferenceDataApi.V1.Boundary.Response
 {
-    public class ReferenceDataResponseObject
-    {
-        public SubCategory SubCategory { get; set; }
-    }
+    public class ReferenceDataResponseObject : Dictionary<string, IEnumerable<ReferenceData>>
+    { }
 }

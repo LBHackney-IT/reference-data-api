@@ -1,20 +1,24 @@
-using ReferenceDataApi.V1.Domain;
+using Nest;
 using System;
+using System.Collections.Generic;
 
 namespace ReferenceDataApi.V1.Infrastructure
 {
-    public class ReferenceDataDb
+    public class QueryableReferenceData
     {
-        public string Category { get; set; }
-
         public Guid Id { get; set; }
 
-        public SubCategory SubCategory { get; set; }
+        [Text(Name = "category")]
+        public string Category { get; set; }
+
+        [Text(Name = "subCategory")]
+        public string SubCategory { get; set; }
+
         public string Code { get; set; }
         public string Value { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Tags Tags { get; set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }
