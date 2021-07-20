@@ -22,8 +22,8 @@ services:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
-    #networks:
-    #    - elastic
+    networks:
+        - elastic
     depends_on:
         #- kibana
         - reference-data-elasticsearch
@@ -41,14 +41,15 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - 9200:9200
+      - 9300:9300
     volumes:
       - reference-data-esdata-test:/usr/share/elasticsearch/data
-    #networks:
-    #  elastic:
-    #    aliases:
-    #      - reference-data-elasticsearch
-    #      - elastic
-    #      - elasticsearch
+    networks:
+      elastic:
+        aliases:
+          - reference-data-elasticsearch
+          - elastic
+          - elasticsearch
 
   #kibana:
   #  image: docker.elastic.co/kibana/kibana:7.9.3
@@ -63,6 +64,6 @@ volumes:
     reference-data-esdata-test:
         driver: local
 
-#networks:
-#  elastic:
-#    driver: bridge
+networks:
+  elastic:
+    driver: bridge
