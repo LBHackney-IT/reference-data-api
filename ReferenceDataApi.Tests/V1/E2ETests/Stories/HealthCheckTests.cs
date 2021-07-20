@@ -7,7 +7,7 @@ namespace ReferenceDataApi.Tests.V1.E2ETests.Stories
 {
     [Story(
         AsA = "Api client",
-        IWant = "to be able to validate that the service satus is healty",
+        IWant = "to be able to validate that the service status is healthy",
         SoThat = "I can be sure that calls made to it will succeed.")]
     [Collection("ElasticSearch collection")]
     public class HealthCheckTests : IDisposable
