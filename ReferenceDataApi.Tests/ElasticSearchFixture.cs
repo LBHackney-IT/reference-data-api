@@ -6,6 +6,7 @@ using ReferenceDataApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Xunit;
@@ -69,6 +70,7 @@ namespace ReferenceDataApi.Tests
 
         private static void EnsureIndexExists(IElasticClient esClient, string index)
         {
+            try { 
             var settingsDoc = File.ReadAllTextAsync("./Data/referencedata-index.json")
                                   .GetAwaiter()
                                   .GetResult();
@@ -79,6 +81,14 @@ namespace ReferenceDataApi.Tests
             esClient.LowLevel.Indices.CreateAsync<BytesResponse>(index, settingsDoc)
                                      .GetAwaiter()
                                      .GetResult();
+
+            }
+            catch (System.Exception e)
+            {
+                var esNodes = string.Join(';', esClient.ConnectionSettings.ConnectionPool.Nodes.Select(x => x.Uri));
+                var message = $"ES call to NodeUris: {esNodes} failed with message: {e.Message}.";
+                throw new Exception(message, e);
+            }
         }
 
         public void AddDataToIndexAsync()

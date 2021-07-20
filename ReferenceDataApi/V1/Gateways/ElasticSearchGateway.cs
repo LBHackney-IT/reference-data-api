@@ -39,20 +39,10 @@ namespace ReferenceDataApi.V1.Gateways
             var esNodes = string.Join(';', _esClient.ConnectionSettings.ConnectionPool.Nodes.Select(x => x.Uri));
             _logger.LogDebug($"ElasticSearch Search begins using {esNodes}");
 
-            try
-            {
-                var results = await _esClient.SearchAsync<QueryableReferenceData>(ConstructSearchRequest(query))
-                    .ConfigureAwait(false);
+            var results = await _esClient.SearchAsync<QueryableReferenceData>(ConstructSearchRequest(query))
+                .ConfigureAwait(false);
 
-                return new List<ReferenceData>(results.Documents.Select(x => x.ToDomain()));
-            }
-            catch (System.Exception e)
-            {
-                var message = $"ES call to NodeUris: {esNodes} failed with message: {e.Message}.";
-#pragma warning disable S112 // General exceptions should never be thrown
-                throw new System.Exception(message, e);
-#pragma warning restore S112 // General exceptions should never be thrown
-            }
+            return new List<ReferenceData>(results.Documents.Select(x => x.ToDomain()));
         }
 
         private ISearchRequest ConstructSearchRequest(GetReferenceDataQuery query)
