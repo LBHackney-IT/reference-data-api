@@ -33,6 +33,7 @@ services:
     container_name: reference-data-elasticsearch
     build:
       context: .
+      dockerfile: data/elasticsearch/Dockerfile
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node

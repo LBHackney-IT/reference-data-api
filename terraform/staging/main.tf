@@ -75,6 +75,6 @@ module "elasticsearch_db_staging" {
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/staging/elasticsearch-domain"
   type = "String"
-  value = elasticsearch_db_staging.es_endpoint_url
+  value = "https://${elasticsearch_db_staging.es_endpoint_url}"
 }
 
