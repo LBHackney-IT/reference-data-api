@@ -15,7 +15,8 @@
       "launchUrl": "api/v1/healthcheck/ping",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "LocalDevelopment"
+        "ASPNETCORE_ENVIRONMENT": "LocalDevelopment",
+        "ElasticSearchDomainUrl": "http://localhost:9200"
       }
     }
   }

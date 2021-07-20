@@ -18,6 +18,9 @@ namespace ReferenceDataApi.V1.Gateways
         private readonly ILogger<ElasticSearchGateway> _logger;
 
         private readonly Indices.ManyIndices _indices;
+        private const int MaxResults = 1000;
+
+        public static string EsIndex => "referencedata";
 
         public ElasticSearchGateway(IElasticClient esClient,
             ISearchReferenceDataQueryContainerOrchestrator containerOrchestrator,
@@ -27,7 +30,7 @@ namespace ReferenceDataApi.V1.Gateways
             _containerOrchestrator = containerOrchestrator;
             _logger = logger;
 
-            _indices = Indices.Index(new List<IndexName> { "referencedata" });
+            _indices = Indices.Index(new List<IndexName> { EsIndex });
         }
 
         [LogCall]
@@ -53,7 +56,7 @@ namespace ReferenceDataApi.V1.Gateways
             return new SearchRequest(_indices)
             {
                 Query = _containerOrchestrator.Create(query, new QueryContainerDescriptor<QueryableReferenceData>()),
-                Size = int.MaxValue
+                Size = MaxResults
             };
         }
     }

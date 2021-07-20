@@ -1,0 +1,21 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": { "type": "text" },
+      "category": { "type": "text" },
+      "subCategory": { "type": "text" },
+      "code": { "type": "text" },
+      "value": { "type": "text" },
+      "description": { "type": "text" },
+      "isActive": { "type": "boolean" },
+      "createdAt": { "type": "date" },
+      "tags": { "type": "text" }
+    }
+  }
+}

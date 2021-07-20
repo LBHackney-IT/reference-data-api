@@ -1,3 +1,5 @@
+using Amazon;
+using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using FluentValidation.AspNetCore;
 using Hackney.Core.HealthCheck;
@@ -16,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using ReferenceDataApi.HealthCheck;
 using ReferenceDataApi.V1.Gateways;
 using ReferenceDataApi.V1.Infrastructure;
 using ReferenceDataApi.V1.UseCase;
@@ -28,6 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace ReferenceDataApi
 {
@@ -53,6 +57,10 @@ namespace ReferenceDataApi
             services
                 .AddMvc()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()))
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddApiVersioning(o =>
@@ -121,9 +129,15 @@ namespace ReferenceDataApi
                     c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            AWSXRayRecorder.InitializeInstance(Configuration);
+            AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
+
             services.ConfigureLambdaLogging(Configuration);
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
+            services.AddElasticSearchHealthCheck();
 
             RegisterGateways(services);
             RegisterUseCases(services);
@@ -132,6 +146,8 @@ namespace ReferenceDataApi
         private static void RegisterGateways(IServiceCollection services)
         {
             services.AddScoped<IReferenceDataGateway, ElasticSearchGateway>();
+
+            services.AddScoped<ISearchReferenceDataQueryContainerOrchestrator, SearchReferenceDataQueryContainerOrchestrator>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
@@ -147,10 +163,6 @@ namespace ReferenceDataApi
                 .AllowAnyHeader()
                 .AllowAnyMethod());
 
-            app.UseCorrelationId();
-            app.UseLoggingScope();
-            app.UseCustomExceptionHandler(logger);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -160,6 +172,9 @@ namespace ReferenceDataApi
                 app.UseHsts();
             }
 
+            app.UseCorrelationId();
+            app.UseLoggingScope();
+            app.UseCustomExceptionHandler(logger);
             app.UseXRay("reference-data-api");
 
             //Get All ApiVersions,
@@ -188,6 +203,8 @@ namespace ReferenceDataApi
                     ResponseWriter = HealthCheckResponseWriter.WriteResponse
                 });
             });
+
+            app.UseLogCall();
         }
     }
 }

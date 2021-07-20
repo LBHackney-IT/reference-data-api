@@ -1,10 +1,8 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using Nest;
-using ReferenceDataApi.HealthCheck;
 using ReferenceDataApi.V1.Infrastructure;
 using System;
 using System.Linq;
@@ -60,9 +58,6 @@ namespace ReferenceDataApi.Tests.V1.Infrastructure
             services.ConfigureElasticSearch(_mockConfiguration.Object);
 
             _mockConfiguration.Verify(x => x.GetSection(ConfigKey), Times.Once);
-
-            services.Any(x => (x.ServiceType == typeof(IHealthCheck))
-                           && (x.ImplementationType == typeof(ElasticSearchHealthCheck))).Should().BeTrue();
 
             var serviceProvider = services.BuildServiceProvider();
             var esClient = serviceProvider.GetService<IElasticClient>();

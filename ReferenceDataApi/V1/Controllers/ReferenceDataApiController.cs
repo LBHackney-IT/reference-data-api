@@ -27,7 +27,7 @@ namespace ReferenceDataApi.V1.Controllers
         [ProducesResponseType(typeof(ReferenceDataResponseObject), StatusCodes.Status500InternalServerError)]
         [HttpGet, MapToApiVersion("1")]
         [LogCall(LogLevel.Information)]
-        public async Task<IActionResult> GetReferenceDataAsync(GetReferenceDataQuery query)
+        public async Task<IActionResult> GetReferenceDataAsync([FromQuery] GetReferenceDataQuery query)
         {
             return Ok(await _getRefDataUseCase.ExecuteAsync(query));
         }

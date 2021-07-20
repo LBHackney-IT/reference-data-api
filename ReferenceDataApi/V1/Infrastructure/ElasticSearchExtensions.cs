@@ -3,9 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Nest;
-using ReferenceDataApi.HealthCheck;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ReferenceDataApi.V1.Infrastructure
 {
@@ -26,8 +24,6 @@ namespace ReferenceDataApi.V1.Infrastructure
                                                                  .DisableDirectStreaming();
             var esClient = new ElasticClient(connectionSettings);
             services.TryAddSingleton<IElasticClient>(esClient);
-
-            services.AddElasticSearchHealthCheck();
         }
     }
 }

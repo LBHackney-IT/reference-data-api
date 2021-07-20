@@ -47,7 +47,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="V1\E2ETests\" />
+    <Content Update="Data\referencedata-index.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
