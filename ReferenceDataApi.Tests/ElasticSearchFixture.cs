@@ -65,19 +65,28 @@ namespace ReferenceDataApi.Tests
 
         private static void WaitForESInstance(IElasticClient elasticSearchClient)
         {
-            PingResponse pingResponse = null;
+            Exception ex = null;
             var timeout = DateTime.UtcNow.AddSeconds(5);
             while (DateTime.UtcNow < timeout)
             {
-                pingResponse = elasticSearchClient.Ping();
-                if (pingResponse.IsValid)
-                    return;
+                try
+                {
+                    var pingResponse = elasticSearchClient.Ping();
+                    if (pingResponse.IsValid)
+                        return;
+                    else
+                        ex = pingResponse.OriginalException;
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                }
 
                 Thread.Sleep(200);
             }
 
-            if (pingResponse != null)
-                throw pingResponse.OriginalException;
+            if (ex != null)
+                throw ex;
         }
 
         private static void EnsureEnvVarConfigured(string name, string defaultValue)
