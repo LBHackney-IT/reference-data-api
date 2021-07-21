@@ -70,17 +70,18 @@ namespace ReferenceDataApi.Tests
 
         private static void EnsureIndexExists(IElasticClient esClient, string index)
         {
-            try { 
-            var settingsDoc = File.ReadAllTextAsync("./Data/referencedata-index.json")
-                                  .GetAwaiter()
-                                  .GetResult();
+            try
+            {
+                var settingsDoc = File.ReadAllTextAsync("./Data/referencedata-index.json")
+                                      .GetAwaiter()
+                                      .GetResult();
 
-            if (esClient.Indices.Exists(index).Exists)
-                esClient.Indices.Delete(index);
+                if (esClient.Indices.Exists(index).Exists)
+                    esClient.Indices.Delete(index);
 
-            esClient.LowLevel.Indices.CreateAsync<BytesResponse>(index, settingsDoc)
-                                     .GetAwaiter()
-                                     .GetResult();
+                esClient.LowLevel.Indices.CreateAsync<BytesResponse>(index, settingsDoc)
+                                         .GetAwaiter()
+                                         .GetResult();
 
             }
             catch (System.Exception e)
