@@ -79,7 +79,7 @@ namespace ReferenceDataApi.Tests.V1.Gateways
             result.Should().BeEquivalentTo(_testFixture.Data.Where(r => (r.Category == query.Category) && (r.SubCategory == query.SubCategory))
                                                             .Select(x => x));
 
-            _mockLogger.VerifyExact(LogLevel.Debug, $"ElasticSearch Search begins using {_testFixture.NodeUri}/", Times.Once());
+            _mockLogger.VerifyContains(LogLevel.Debug, $"ElasticSearch Search begins using {_testFixture.NodeUri}", Times.Once());
         }
     }
 }
