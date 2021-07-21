@@ -75,6 +75,6 @@ module "elasticsearch_db_production" {
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/production/elasticsearch-domain"
   type = "String"
-  value = "https://${elasticsearch_db_production.es_endpoint_url}"
+  value = "https://${module.elasticsearch_db_production.es_endpoint_url}"
 }
 

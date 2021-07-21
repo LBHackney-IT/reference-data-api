@@ -66,7 +66,7 @@ namespace ReferenceDataApi.Tests
         private static void WaitForESInstance(IElasticClient elasticSearchClient)
         {
             Exception ex = null;
-            var timeout = DateTime.UtcNow.AddSeconds(5);
+            var timeout = DateTime.UtcNow.AddSeconds(5); // 5 second timeout (make configurable?)
             while (DateTime.UtcNow < timeout)
             {
                 try
