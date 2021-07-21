@@ -75,7 +75,7 @@ module "elasticsearch_db_development" {
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/development/elasticsearch-domain"
   type = "String"
-  value = https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com
+  value = "https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com"
 }
 
 
