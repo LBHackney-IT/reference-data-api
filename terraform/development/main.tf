@@ -70,13 +70,14 @@ module "elasticsearch_db_development" {
   ebs_volume_size  = "10"
   region           = data.aws_region.current.name
   account_id       = data.aws_caller_identity.current.account_id
+  create_service_role   = false
 }
 
-/* The value for this should really be: local.esDomain */
+/* The value for this should resolve to be: "https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com" */
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/development/elasticsearch-domain"
   type = "String"
-  value = "https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com"
+  value = local.esDomain
 }
 
 

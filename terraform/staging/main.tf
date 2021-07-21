@@ -26,6 +26,7 @@ data "aws_region" "current" {}
 
 locals {
     parameter_store = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter"
+    esDomain = "https://${module.elasticsearch_db_staging.es_endpoint_url}"
 }
 
 terraform {
@@ -75,6 +76,6 @@ module "elasticsearch_db_staging" {
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/staging/elasticsearch-domain"
   type = "String"
-  value = "https://${module.elasticsearch_db_staging.es_endpoint_url}"
+  value = local.esDomain
 }
 
