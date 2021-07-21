@@ -72,10 +72,11 @@ module "elasticsearch_db_development" {
   account_id       = data.aws_caller_identity.current.account_id
 }
 
+/* The value for this should really be: local.esDomain */
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/development/elasticsearch-domain"
   type = "String"
-  value = local.esDomain
+  value = "https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com"
 }
 
 
