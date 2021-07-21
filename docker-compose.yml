@@ -12,7 +12,6 @@ services:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
     networks:
       - elastic
-      - default
     ports:
       - 3000:3000
     depends_on:
@@ -29,7 +28,6 @@ services:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
     networks:
       - elastic
-      - default
     depends_on:
       #- kibana
       - reference-data-elasticsearch
@@ -52,7 +50,6 @@ services:
       - reference-data-esdata-test:/usr/share/elasticsearch/data
     networks:
       - elastic
-      - default
 
   #kibana:
   #  image: docker.elastic.co/kibana/kibana:7.9.3

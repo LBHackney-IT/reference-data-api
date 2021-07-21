@@ -38,6 +38,7 @@ namespace ReferenceDataApi.Tests
             _factory = new MockWebApplicationFactory<TStartup>();
             Client = _factory.CreateClient();
 
+            WaitForESInstance(ElasticSearchClient);
             EnsureIndexExists(ElasticSearchClient, _index);
             AddDataToIndexAsync();
         }
@@ -60,6 +61,23 @@ namespace ReferenceDataApi.Tests
                     _factory.Dispose();
                 _disposed = true;
             }
+        }
+
+        private static void WaitForESInstance(IElasticClient elasticSearchClient)
+        {
+            PingResponse pingResponse = null;
+            var timeout = DateTime.UtcNow.AddSeconds(5);
+            while (DateTime.UtcNow < timeout)
+            {
+                pingResponse = elasticSearchClient.Ping();
+                if (pingResponse.IsValid)
+                    return;
+
+                Thread.Sleep(200);
+            }
+
+            if (pingResponse != null)
+                throw pingResponse.OriginalException;
         }
 
         private static void EnsureEnvVarConfigured(string name, string defaultValue)
