@@ -21,10 +21,25 @@ namespace ReferenceDataApi.Tests.V1.Gateways
 
         private bool HasIsActiveFilter(IQueryContainer qc)
         {
-            if (qc.Term is null) return false;
+            return HasTermExpression(qc.Term, $"field => field.{nameof(QueryableReferenceData.IsActive)}", true);
+        }
 
-            return (qc.Term.Field.Expression.ToString() == $"m => m.{nameof(QueryableReferenceData.IsActive)}")
-                && (bool) qc.Term.Value;
+        private bool HasCategoryFilter(IQueryContainer qc, string val)
+        {
+            return HasTermExpression(qc.Term, $"field => field.{nameof(QueryableReferenceData.Category)}.Suffix(\"keyword\")", val);
+        }
+
+        private bool HasSubCategoryFilter(IQueryContainer qc, string val)
+        {
+            return HasTermExpression(qc.Term, $"field => field.{nameof(QueryableReferenceData.SubCategory)}.Suffix(\"keyword\")", val);
+        }
+
+        private bool HasTermExpression(ITermQuery term, string field, object val)
+        {
+            if (term is null) return false;
+
+            return (term.Field.Expression.ToString() == field)
+                && (term.Value.ToString() == val.ToString());
         }
 
         [Theory]
@@ -41,17 +56,18 @@ namespace ReferenceDataApi.Tests.V1.Gateways
             var result = _sut.Create(apiQuery, new QueryContainerDescriptor<QueryableReferenceData>());
 
             // Assert
-
+            var qc = (result as IQueryContainer);
             if (!string.IsNullOrEmpty(subCategory))
             {
-                (result as IQueryContainer).Bool.Must.Any(x => (x as IQueryContainer).Match.Query == apiQuery.Category).Should().BeTrue();
-                (result as IQueryContainer).Bool.Must.Any(x => (x as IQueryContainer).Match.Query == apiQuery.SubCategory).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasCategoryFilter(x as IQueryContainer, apiQuery.Category)).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasSubCategoryFilter(x as IQueryContainer, apiQuery.SubCategory)).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasIsActiveFilter(x as IQueryContainer)).Should().BeTrue();
             }
             else
             {
-                (result as IQueryContainer).Match.Should().BeNull();
-                (result as IQueryContainer).Bool.Must.Any(x => (x as IQueryContainer).Match.Query == apiQuery.Category).Should().BeTrue();
-                (result as IQueryContainer).Bool.Must.Any(x => HasIsActiveFilter(x as IQueryContainer)).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasCategoryFilter(x as IQueryContainer, apiQuery.Category)).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasSubCategoryFilter(x as IQueryContainer, apiQuery.SubCategory)).Should().BeFalse();
+                qc.Bool.Must.Any(x => HasIsActiveFilter(x as IQueryContainer)).Should().BeTrue();
             }
         }
 
@@ -59,7 +75,7 @@ namespace ReferenceDataApi.Tests.V1.Gateways
         [InlineData(null)]
         [InlineData(false)]
         [InlineData(true)]
-        public void ShouldReturnQueryThatSearchesCategoryAndInactive(bool? includeInactive)
+        public void ShouldReturnQueryThatSearchesCategory(bool? includeInactive)
         {
             var apiQuery = new GetReferenceDataQuery
             {
@@ -69,16 +85,18 @@ namespace ReferenceDataApi.Tests.V1.Gateways
             var result = _sut.Create(apiQuery, new QueryContainerDescriptor<QueryableReferenceData>());
 
             // Assert
+            var qc = (result as IQueryContainer);
             if (!includeInactive.HasValue || !includeInactive.Value)
             {
-                (result as IQueryContainer).Match.Should().BeNull();
-                (result as IQueryContainer).Bool.Must.Any(x => (x as IQueryContainer).Match.Query == apiQuery.Category).Should().BeTrue();
-                (result as IQueryContainer).Bool.Must.Any(x => HasIsActiveFilter(x as IQueryContainer)).Should().BeTrue();
+                qc.Term.Should().BeNull();
+                qc.Bool.Must.Any(x => HasCategoryFilter(x as IQueryContainer, apiQuery.Category)).Should().BeTrue();
+                qc.Bool.Must.Any(x => HasSubCategoryFilter(x as IQueryContainer, apiQuery.SubCategory)).Should().BeFalse();
+                qc.Bool.Must.Any(x => HasIsActiveFilter(x as IQueryContainer)).Should().BeTrue();
             }
             else
             {
-                (result as IQueryContainer).Match.Query.Should().Be(apiQuery.Category);
-                (result as IQueryContainer).Bool.Should().BeNull();
+                HasCategoryFilter(qc, apiQuery.Category).Should().BeTrue();
+                qc.Bool.Should().BeNull();
             }
         }
     }

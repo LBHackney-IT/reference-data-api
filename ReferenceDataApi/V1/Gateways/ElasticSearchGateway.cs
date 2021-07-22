@@ -40,8 +40,8 @@ namespace ReferenceDataApi.V1.Gateways
             var esNodes = string.Join(';', _esClient.ConnectionSettings.ConnectionPool.Nodes.Select(x => x.Uri));
             _logger.LogDebug($"ElasticSearch Search begins using {esNodes}");
 
-            var results = await _esClient.SearchAsync<QueryableReferenceData>(ConstructSearchRequest(query))
-                .ConfigureAwait(false);
+            var searchRequest = ConstructSearchRequest(query);
+            var results = await _esClient.SearchAsync<QueryableReferenceData>(searchRequest).ConfigureAwait(false);
 
             return new List<ReferenceData>(results.Documents.Select(x => x.ToDomain()));
         }

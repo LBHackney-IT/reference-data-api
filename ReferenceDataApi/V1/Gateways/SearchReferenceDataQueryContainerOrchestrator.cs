@@ -8,13 +8,15 @@ namespace ReferenceDataApi.V1.Gateways
     {
         public QueryContainer Create(GetReferenceDataQuery apiQuery, QueryContainerDescriptor<QueryableReferenceData> queryContainerDescriptor)
         {
-            var queryContainer = queryContainerDescriptor.Match(m => m.Field(f => f.Category).Query(apiQuery.Category));
+            var queryContainer = queryContainerDescriptor.Term(term => term.Field(field => field.Category.Suffix("keyword"))
+                                                                           .Value(apiQuery.Category));
             if (!string.IsNullOrEmpty(apiQuery.SubCategory))
-                queryContainer = queryContainer && queryContainerDescriptor.Match(m => m.Field(f => f.SubCategory).Query(apiQuery.SubCategory));
+                queryContainer = queryContainer && queryContainerDescriptor.Term(term => term.Field(field => field.SubCategory.Suffix("keyword"))
+                                                                                             .Value(apiQuery.SubCategory));
 
             bool includeInactive = apiQuery.IncludeInactive.HasValue && apiQuery.IncludeInactive.Value;
             if (!includeInactive)
-                queryContainer = queryContainer && queryContainerDescriptor.Term(m => m.IsActive, true);
+                queryContainer = queryContainer && queryContainerDescriptor.Term(field => field.IsActive, true);
             return queryContainer;
         }
     }

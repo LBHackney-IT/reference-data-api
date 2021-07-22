@@ -121,20 +121,12 @@ namespace ReferenceDataApi.Tests
 
         public void AddDataToIndexAsync()
         {
-            var tags = new[] { "animal", "vegetable", "mineral" };
             // Add the Category/SubCategory combo used in tests
-            Data.AddRange(_fixture.Build<QueryableReferenceData>()
-                                  .With(x => x.Category, Category)
-                                  .With(x => x.SubCategory, SubCategory)
-                                  .With(x => x.Tags, tags)
-                                  .With(x => x.IsActive, true)
-                                  .CreateMany(10));
-            Data.AddRange(_fixture.Build<QueryableReferenceData>()
-                                  .With(x => x.Category, Category)
-                                  .With(x => x.SubCategory, SubCategory)
-                                  .With(x => x.Tags, tags)
-                                  .With(x => x.IsActive, false)
-                                  .CreateMany(10));
+            AddData(Category, SubCategory, 10, 10);
+
+            // This dataset is to test an exact match on category and sub category
+            AddData($"{Category}-different", $"{SubCategory}-different", 10, 10);
+
             // Add other data for the named category
             AddData(Category);
 
@@ -154,17 +146,22 @@ namespace ReferenceDataApi.Tests
             {
                 var categoryToUse = category ?? $"Category-{i}";
                 var subToUse = $"Sub-Category-{i}";
-                Data.AddRange(_fixture.Build<QueryableReferenceData>()
-                                     .With(x => x.Category, categoryToUse)
-                                     .With(x => x.SubCategory, subToUse)
-                                     .With(x => x.IsActive, true)
-                                     .CreateMany(5));
-                Data.AddRange(_fixture.Build<QueryableReferenceData>()
-                                     .With(x => x.Category, categoryToUse)
-                                     .With(x => x.SubCategory, subToUse)
-                                     .With(x => x.IsActive, false)
-                                     .CreateMany(5));
+                AddData(categoryToUse, subToUse, 5, 5);
             }
+        }
+
+        private void AddData(string category, string subCategory, int active, int inactive)
+        {
+            Data.AddRange(_fixture.Build<QueryableReferenceData>()
+                                    .With(x => x.Category, category)
+                                    .With(x => x.SubCategory, subCategory)
+                                    .With(x => x.IsActive, true)
+                                    .CreateMany(active));
+            Data.AddRange(_fixture.Build<QueryableReferenceData>()
+                                    .With(x => x.Category, category)
+                                    .With(x => x.SubCategory, subCategory)
+                                    .With(x => x.IsActive, false)
+                                    .CreateMany(inactive));
         }
 
         public void GivenDataAlreadyExists()
