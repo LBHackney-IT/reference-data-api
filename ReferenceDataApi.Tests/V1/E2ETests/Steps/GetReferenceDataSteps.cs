@@ -14,30 +14,33 @@ namespace ReferenceDataApi.Tests.V1.E2ETests.Steps
         public GetReferenceDataSteps(HttpClient httpClient) : base(httpClient)
         { }
 
-        public async Task WhenReferenceDataIsRequested(string category)
+        public async Task WhenReferenceDataIsRequested(string category, bool? includeInactive)
         {
-            await WhenReferenceDataIsRequested(category, null).ConfigureAwait(false);
+            await WhenReferenceDataIsRequested(category, null, includeInactive).ConfigureAwait(false);
         }
-        public async Task WhenReferenceDataIsRequested(string category, string subCategory)
+        public async Task WhenReferenceDataIsRequested(string category, string subCategory, bool? includeInactive)
         {
             string route = $"api/v1/reference-data?category={category}";
             if (!string.IsNullOrEmpty(subCategory)) route += $"&subCategory={subCategory}";
+            if (includeInactive.HasValue) route += $"&includeInactive={includeInactive}";
 
             var uri = new Uri(route, UriKind.Relative);
             _lastResponse = await _httpClient.GetAsync(uri).ConfigureAwait(false);
         }
 
-        public async Task ThenTheCategoryReferenceDataIsReturned(ElasticSearchFixture<Startup> testFixture, string category)
+        public async Task ThenTheCategoryReferenceDataIsReturned(ElasticSearchFixture<Startup> testFixture, string category, bool? includeInactive)
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var responseContent = await _lastResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
             var response = JsonSerializer.Deserialize<ReferenceDataResponseObject>(responseContent, CreateJsonOptions());
 
-            var expectedSubCategories = testFixture.Data.Where(r => (r.Category == category))
-                                                        .Select(x => x)
-                                                        .GroupBy(y => y.SubCategory);
+            var expected = testFixture.Data.Where(r => (r.Category == category))
+                                                        .Select(x => x);
+            if (!includeInactive.HasValue || !includeInactive.Value)
+                expected = expected.Where(x => x.IsActive);
 
+            var expectedSubCategories = expected.GroupBy(y => y.SubCategory);
             response.Count.Should().Be(expectedSubCategories.Count());
             foreach (var subCategory in expectedSubCategories)
             {
@@ -46,7 +49,7 @@ namespace ReferenceDataApi.Tests.V1.E2ETests.Steps
             }
         }
 
-        public async Task ThenTheSubCategoryReferenceDataIsReturned(ElasticSearchFixture<Startup> testFixture, string category, string subCategory)
+        public async Task ThenTheSubCategoryReferenceDataIsReturned(ElasticSearchFixture<Startup> testFixture, string category, string subCategory, bool? includeInactive)
         {
             _lastResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -55,6 +58,9 @@ namespace ReferenceDataApi.Tests.V1.E2ETests.Steps
 
             var expected = testFixture.Data.Where(r => (r.Category == category) && (r.SubCategory == subCategory))
                                            .Select(x => x);
+
+            if (!includeInactive.HasValue || !includeInactive.Value)
+                expected = expected.Where(x => x.IsActive);
 
             response.Count.Should().Be(1);
             response.First().Key.Should().Be(subCategory);

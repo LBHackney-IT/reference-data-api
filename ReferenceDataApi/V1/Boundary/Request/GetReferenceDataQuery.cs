@@ -8,5 +8,7 @@ namespace ReferenceDataApi.V1.Boundary.Request
         public string Category { get; set; }
         [FromQuery]
         public string SubCategory { get; set; }
+        [FromQuery]
+        public bool? IncludeInactive { get; set; }
     }
 }

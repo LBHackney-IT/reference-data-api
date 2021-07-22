@@ -36,38 +36,50 @@ namespace ReferenceDataApi.Tests.V1.E2ETests.Stories
             }
         }
 
-        [Fact]
-        public void ServiceReturnsTheRequestedReferenceDataForCategoryAndSubCategory()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ServiceReturnsTheRequestedReferenceDataForCategoryAndSubCategory(bool? includeInactive)
         {
             this.Given(g => _testFixture.GivenDataAlreadyExists())
-                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category, _testFixture.SubCategory))
-                .Then(t => _steps.ThenTheSubCategoryReferenceDataIsReturned(_testFixture, _testFixture.Category, _testFixture.SubCategory))
+                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category, _testFixture.SubCategory, includeInactive))
+                .Then(t => _steps.ThenTheSubCategoryReferenceDataIsReturned(_testFixture, _testFixture.Category, _testFixture.SubCategory, includeInactive))
                 .BDDfy();
         }
 
-        [Fact]
-        public void ServiceReturnsTheRequestedReferenceDataForCategory()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ServiceReturnsTheRequestedReferenceDataForCategory(bool? includeInactive)
         {
             this.Given(g => _testFixture.GivenDataAlreadyExists())
-                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category))
-                .Then(t => _steps.ThenTheCategoryReferenceDataIsReturned(_testFixture, _testFixture.Category))
+                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category, includeInactive))
+                .Then(t => _steps.ThenTheCategoryReferenceDataIsReturned(_testFixture, _testFixture.Category, includeInactive))
                 .BDDfy();
         }
 
-        [Fact]
-        public void ServiceReturnsNoResultsWhenCategoryAndSubCategoryNotFound()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ServiceReturnsNoResultsWhenCategoryAndSubCategoryNotFound(bool? includeInactive)
         {
             this.Given(g => _testFixture.GivenDataAlreadyExists())
-                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category, _testFixture.Unknown))
+                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Category, _testFixture.Unknown, includeInactive))
                 .Then(t => _steps.ThenNoDataIsReturned())
                 .BDDfy();
         }
 
-        [Fact]
-        public void ServiceReturnsNoResultsWhenCategoryNotFound()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ServiceReturnsNoResultsWhenCategoryNotFound(bool? includeInactive)
         {
             this.Given(g => _testFixture.GivenDataAlreadyExists())
-                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Unknown))
+                .When(w => _steps.WhenReferenceDataIsRequested(_testFixture.Unknown, includeInactive))
                 .Then(t => _steps.ThenNoDataIsReturned())
                 .BDDfy();
         }

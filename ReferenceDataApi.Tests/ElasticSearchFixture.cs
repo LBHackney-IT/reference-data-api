@@ -127,6 +127,13 @@ namespace ReferenceDataApi.Tests
                                   .With(x => x.Category, Category)
                                   .With(x => x.SubCategory, SubCategory)
                                   .With(x => x.Tags, tags)
+                                  .With(x => x.IsActive, true)
+                                  .CreateMany(10));
+            Data.AddRange(_fixture.Build<QueryableReferenceData>()
+                                  .With(x => x.Category, Category)
+                                  .With(x => x.SubCategory, SubCategory)
+                                  .With(x => x.Tags, tags)
+                                  .With(x => x.IsActive, false)
                                   .CreateMany(10));
             // Add other data for the named category
             AddData(Category);
@@ -150,6 +157,12 @@ namespace ReferenceDataApi.Tests
                 Data.AddRange(_fixture.Build<QueryableReferenceData>()
                                      .With(x => x.Category, categoryToUse)
                                      .With(x => x.SubCategory, subToUse)
+                                     .With(x => x.IsActive, true)
+                                     .CreateMany(5));
+                Data.AddRange(_fixture.Build<QueryableReferenceData>()
+                                     .With(x => x.Category, categoryToUse)
+                                     .With(x => x.SubCategory, subToUse)
+                                     .With(x => x.IsActive, false)
                                      .CreateMany(5));
             }
         }

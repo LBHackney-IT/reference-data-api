@@ -31,12 +31,13 @@ namespace ReferenceDataApi.Tests.V1.Gateways
             _mockLogger = new Mock<ILogger<ElasticSearchGateway>>();
         }
 
-        private GetReferenceDataQuery ConstructQuery()
+        private GetReferenceDataQuery ConstructQuery(bool? includeInactive = null)
         {
             return new GetReferenceDataQuery()
             {
                 Category = _testFixture.Category,
-                SubCategory = _testFixture.SubCategory
+                SubCategory = _testFixture.SubCategory,
+                IncludeInactive = includeInactive
             };
         }
 
@@ -68,16 +69,23 @@ namespace ReferenceDataApi.Tests.V1.Gateways
             mockContainerOrchestrator.Verify(x => x.Create(query, It.IsAny<QueryContainerDescriptor<QueryableReferenceData>>()), Times.Once);
         }
 
-        [Fact]
-        public async Task GetReferenceDataAsyncReturnsSearchResult()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task GetReferenceDataAsyncReturnsSearchResult(bool? includeInactive)
         {
-            var query = ConstructQuery();
+            var query = ConstructQuery(includeInactive);
 
             var sut = new ElasticSearchGateway(EsClient, new SearchReferenceDataQueryContainerOrchestrator(), _mockLogger.Object);
 
             var result = await sut.GetReferenceDataAsync(query);
-            result.Should().BeEquivalentTo(_testFixture.Data.Where(r => (r.Category == query.Category) && (r.SubCategory == query.SubCategory))
-                                                            .Select(x => x));
+            var expected = _testFixture.Data.Where(r => (r.Category == query.Category) && (r.SubCategory == query.SubCategory))
+                                                            .Select(x => x);
+            if (!includeInactive.HasValue || !includeInactive.Value)
+                expected = expected.Where(x => x.IsActive);
+
+            result.Should().BeEquivalentTo(expected);
 
             _mockLogger.VerifyContains(LogLevel.Debug, $"ElasticSearch Search begins using {_testFixture.NodeUri}", Times.Once());
         }

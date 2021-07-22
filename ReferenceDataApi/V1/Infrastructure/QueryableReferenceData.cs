@@ -17,6 +17,8 @@ namespace ReferenceDataApi.V1.Infrastructure
         public string Code { get; set; }
         public string Value { get; set; }
         public string Description { get; set; }
+
+        [Boolean(Name = "isActive")]
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public IEnumerable<string> Tags { get; set; }

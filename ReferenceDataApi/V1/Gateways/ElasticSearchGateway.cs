@@ -20,6 +20,7 @@ namespace ReferenceDataApi.V1.Gateways
         private readonly Indices.ManyIndices _indices;
         private const int MaxResults = 1000;
 
+        // Should this be put into config?
         public static string EsIndex => "reference_data";
 
         public ElasticSearchGateway(IElasticClient esClient,
