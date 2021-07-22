@@ -19,7 +19,7 @@ functions:
     handler: ReferenceDataApi::ReferenceDataApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
     environment:
-      ElasticSearchDomainUrl: ${ssm:/refrence-data-api/${self:provider.stage}/elasticsearch-domain}
+      ElasticSearchDomainUrl: ${ssm:/reference-data-api/${self:provider.stage}/elasticsearch-domain}
       ASPNETCORE_ENVIRONMENT:  ${ssm:/housing-tl/${self:provider.stage}/aspnetcore-environment}
     events:
       - http:
