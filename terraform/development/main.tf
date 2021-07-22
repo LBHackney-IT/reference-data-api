@@ -73,7 +73,6 @@ module "elasticsearch_db_development" {
   create_service_role   = false
 }
 
-/* The value for this should resolve to be: "https://vpc-reference-data-api-es-vrvkuxitbpzz7vbnrnnf37ej3m.eu-west-2.es.amazonaws.com" */
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
   name = "/reference-data-api/development/elasticsearch-domain"
   type = "String"
