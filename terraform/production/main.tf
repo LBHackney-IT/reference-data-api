@@ -61,7 +61,7 @@ module "elasticsearch_db_production" {
   environment_name      = "production"
   port                  = 443
   domain_name           = "reference-data-api-es"
-  subnet_ids            = data.aws_subnet_ids.development.ids
+  subnet_ids            = data.aws_subnet_ids.production.ids
   project_name          = "reference-data-api"
   es_version            = "7.8"
   encrypt_at_rest       = "false"
