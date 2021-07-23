@@ -1,5 +1,6 @@
+using Amazon;
+using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
-using Elasticsearch.Net;
 using FluentValidation.AspNetCore;
 using Hackney.Core.HealthCheck;
 using Hackney.Core.Logging;
@@ -14,11 +15,9 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Nest;
 using ReferenceDataApi.HealthCheck;
 using ReferenceDataApi.V1.Gateways;
 using ReferenceDataApi.V1.Infrastructure;
@@ -32,6 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace ReferenceDataApi
 {
@@ -57,6 +57,10 @@ namespace ReferenceDataApi
             services
                 .AddMvc()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()))
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddApiVersioning(o =>
@@ -125,36 +129,30 @@ namespace ReferenceDataApi
                     c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            AWSXRayRecorder.InitializeInstance(Configuration);
+            AWSXRayRecorder.RegisterLogger(LoggingOptions.SystemDiagnostics);
+
             services.ConfigureLambdaLogging(Configuration);
             services.AddLogCallAspect();
-            ConfigureElasticsearch(services);
+            services.ConfigureElasticSearch(Configuration);
+            services.AddElasticSearchHealthCheck();
 
             RegisterGateways(services);
             RegisterUseCases(services);
         }
 
-        private static void ConfigureElasticsearch(IServiceCollection services)
-        {
-            var url = Environment.GetEnvironmentVariable("ELASTICSEARCH_DOMAIN_URL") ?? "http://localhost:9200";
-            var pool = new SingleNodeConnectionPool(new Uri(url));
-            var connectionSettings =
-                new ConnectionSettings(pool)
-                    .PrettyJson().ThrowExceptions().DisableDirectStreaming();
-            var esClient = new ElasticClient(connectionSettings);
-
-            services.TryAddSingleton<IElasticClient>(esClient);
-
-            services.AddElasticSearchHealthCheck();
-        }
-
         private static void RegisterGateways(IServiceCollection services)
         {
-            services.AddScoped<IExampleGateway, ElasticSearchGateway>();
+            services.AddScoped<IReferenceDataGateway, ElasticSearchGateway>();
+
+            services.AddScoped<ISearchReferenceDataQueryContainerOrchestrator, SearchReferenceDataQueryContainerOrchestrator>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
-            services.AddScoped<IGetAllUseCase, GetAllUseCase>();
+            services.AddScoped<IGetReferenceDataUseCase, GetReferenceDataUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -165,10 +163,6 @@ namespace ReferenceDataApi
                 .AllowAnyHeader()
                 .AllowAnyMethod());
 
-            app.UseCorrelationId();
-            app.UseLoggingScope();
-            app.UseCustomExceptionHandler(logger);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -178,6 +172,9 @@ namespace ReferenceDataApi
                 app.UseHsts();
             }
 
+            app.UseCorrelationId();
+            app.UseLoggingScope();
+            app.UseCustomExceptionHandler(logger);
             app.UseXRay("reference-data-api");
 
             //Get All ApiVersions,
@@ -206,6 +203,8 @@ namespace ReferenceDataApi
                     ResponseWriter = HealthCheckResponseWriter.WriteResponse
                 });
             });
+
+            app.UseLogCall();
         }
     }
 }

@@ -1,19 +1,42 @@
+using AutoFixture;
+using FluentAssertions;
 using ReferenceDataApi.V1.Domain;
 using ReferenceDataApi.V1.Factories;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace ReferenceDataApi.Tests.V1.Factories
 {
     public class ResponseFactoryTest
     {
-        //TODO: add assertions for all the fields being mapped in `ResponseFactory.ToResponse()`. Also be sure to add test cases for
-        // any edge cases that might exist.
-        [Fact]
-        public void CanMapADatabaseEntityToADomainObject()
+        private readonly Fixture _fixture = new Fixture();
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
+        [InlineData(5)]
+        public void CanMapADomainEntityCollectionToAResponseObject(int subCategoriesCount)
         {
-            var domain = new ReferenceData();
-            var response = domain.ToResponse();
-            //TODO: check here that all of the fields have been mapped correctly. i.e. response.fieldOne.Should().Be("one")
+            List<ReferenceData> domainRefData = new List<ReferenceData>();
+            for (int i = 1; i <= subCategoriesCount; i++)
+            {
+                domainRefData.AddRange(_fixture.Build<ReferenceData>()
+                                               .With(x => x.SubCategory, _fixture.Create<string>())
+                                               .CreateMany(5));
+            }
+
+            var responseObject = domainRefData.ToResponse();
+
+            var actualSubCategoryKeysList = responseObject.Keys.Select(x => x);
+            var expectedSubCategoryKeysList = domainRefData.OrderBy(y => y.SubCategory).Select(x => x.SubCategory).Distinct();
+            actualSubCategoryKeysList.Should().BeEquivalentTo(expectedSubCategoryKeysList, config => config.WithStrictOrdering());
+
+            foreach (var subCategory in responseObject)
+            {
+                var expectedSubCategoryObjects = domainRefData.Where(x => x.SubCategory == subCategory.Key).OrderBy(y => y.Value);
+                subCategory.Value.Should().BeEquivalentTo(expectedSubCategoryObjects, config => config.WithStrictOrdering());
+            }
         }
     }
 }

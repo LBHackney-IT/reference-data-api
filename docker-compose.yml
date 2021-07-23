@@ -8,10 +8,14 @@ services:
       dockerfile: ReferenceDataApi/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+    environment:
+      - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
+    networks:
+      - elastic
     ports:
       - 3000:3000
     depends_on:
-        - kibana
+      - reference-data-elasticsearch
 
   reference-data-api-test:
     image: reference-data-api-test
@@ -20,8 +24,13 @@ services:
       dockerfile: ReferenceDataApi.Tests/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+    environment:
+      - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
+    networks:
+      - elastic
     depends_on:
-        - kibana
+      #- kibana
+      - reference-data-elasticsearch
       
   reference-data-elasticsearch:
     image: reference-data-elasticsearch
@@ -36,26 +45,25 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - 9200:9200
+      - 9300:9300
     volumes:
       - reference-data-esdata-test:/usr/share/elasticsearch/data
     networks:
-      elastic:
-        aliases:
-          - reference-data-elasticsearch
-          - elastic
-          - elasticsearch
-  kibana:
-        image: docker.elastic.co/kibana/kibana:7.9.3
-        ports:
-            - "5601:5601"
-        networks:
-            - elastic
-        depends_on:
-            - reference-data-elasticsearch
+      - elastic
+
+  #kibana:
+  #  image: docker.elastic.co/kibana/kibana:7.9.3
+  #  ports:
+  #      - "5601:5601"
+  #  networks:
+  #      - elastic
+  #  depends_on:
+  #      - reference-data-elasticsearch
         
 volumes:
     reference-data-esdata-test:
         driver: local
+
 networks:
   elastic:
     driver: bridge

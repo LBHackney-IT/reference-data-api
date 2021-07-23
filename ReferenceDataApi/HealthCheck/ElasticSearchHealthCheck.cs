@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ReferenceDataApi.HealthCheck
 {
+    /// <summary>
+    /// <see cref="IHealthCheck"/> implementation to verify access to an ElasticSearch instance
+    /// </summary>
     public class ElasticSearchHealthCheck : IHealthCheck
     {
         private readonly IElasticClient _esClient;

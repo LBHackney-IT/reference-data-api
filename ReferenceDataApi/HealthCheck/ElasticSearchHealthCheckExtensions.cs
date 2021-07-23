@@ -20,7 +20,6 @@ namespace ReferenceDataApi.HealthCheck
             return builder.AddCheck<ElasticSearchHealthCheck>(Name);
         }
 
-
         /// <summary>
         /// Adds a health check to verify connectivity to the Elastic Search instance
         /// </summary>
