@@ -72,6 +72,7 @@ module "elasticsearch_db_production" {
   region                = data.aws_region.current.name
   account_id            = data.aws_caller_identity.current.account_id
   create_service_role   = false
+  zone_awareness_enabled = true
 }
 
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
