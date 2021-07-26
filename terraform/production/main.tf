@@ -29,6 +29,14 @@ locals {
     esDomain = "https://${module.elasticsearch_db_production.es_endpoint_url}"
 }
 
+data "aws_iam_role" "ec2_container_service_role" {
+  name = "ecsServiceRole"
+}
+
+data "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+}
+
 terraform {
   backend "s3" {
     bucket  = "terraform-state-housing-production"
