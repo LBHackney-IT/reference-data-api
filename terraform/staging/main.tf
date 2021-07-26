@@ -61,7 +61,7 @@ module "elasticsearch_db_staging" {
   environment_name = "staging"
   port             = 443
   domain_name      = "reference-data-api-es"
-  subnet_ids       = [tolist(data.aws_subnet_ids.staging.ids)[0]]
+  subnet_ids       = data.aws_subnet_ids.staging.ids
   project_name     = "reference-data-api"
   es_version       = "7.8"
   encrypt_at_rest  = "false"
@@ -72,6 +72,7 @@ module "elasticsearch_db_staging" {
   region           = data.aws_region.current.name
   account_id       = data.aws_caller_identity.current.account_id
   create_service_role   = false
+  zone_awareness_enabled = true
 }
 
 resource "aws_ssm_parameter" "reference_data_elasticsearch_domain" {
