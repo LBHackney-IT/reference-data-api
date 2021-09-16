@@ -179,7 +179,7 @@ workflows:
 #              only: master
       - deploy-to-development:
           context: api-assume-role-housing-development-context
-#          requires:
+          requires:
             - assume-role-development
 #          filters:
 #            branches:
