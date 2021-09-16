@@ -89,41 +89,41 @@ resources:
                     - "lambda:InvokeFunction"
                   Resource: "*"
     Canary:
-    Type: AWS::Synthetics::Canary
-    Properties: 
-      Name: ${self:service}-health
-      Code:
-        Handler: pageLoadBlueprint.handler
-        S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
-        S3Key: cw-canary-api-test-script.zip
-      ExecutionRoleArn:
-        - 'Fn::Join':
-            - ':'
-            - - 'arn:aws:iam'
-              - Ref: 'AWS::Region'
+      Type: AWS::Synthetics::Canary
+      Properties: 
+        Name: ${self:service}-health
+        Code:
+          Handler: pageLoadBlueprint.handler
+          S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
+          S3Key: cw-canary-api-test-script.zip
+        ExecutionRoleArn:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:iam'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'role/LBH_Canary_Role'
+        RuntimeVersion: syn-nodejs-puppeteer-3.1
+        RunConfig:
+          TimeoutInSeconds: 300
+          EnvironmentVariables:
+            hostname: ${self:custom.hostname}
+            path: /${self:provider.stage}/api/v1/healthcheck/ping
+            token: ''
+        ArtifactS3Location:
+          Fn::Join:
+            - ''
+            - - s3://
+              - cw-syn-results-
               - Ref: 'AWS::AccountId'
-              - 'role/LBH_Canary_Role'
-      RuntimeVersion: syn-nodejs-puppeteer-3.1
-      RunConfig:
-        TimeoutInSeconds: 300
-        EnvironmentVariables:
-          hostname: ${self:custom.hostname}
-          path: /${self:provider.stage}/api/v1/healthcheck/ping
-          token: ''
-      ArtifactS3Location:
-        Fn::Join:
-          - ''
-          - - s3://
-            - cw-syn-results-
-            - Ref: 'AWS::AccountId'
-            - -
-            - Ref: 'AWS::Region' 
-      StartCanaryAfterCreation: True
-      Schedule:
-        Expression: rate(5 minutes)
-        DurationInSeconds: 0
-      SuccessRetentionPeriod: 90
-      FailureRetentionPeriod: 180
+              - -
+              - Ref: 'AWS::Region' 
+        StartCanaryAfterCreation: True
+        Schedule:
+          Expression: rate(5 minutes)
+          DurationInSeconds: 0
+        SuccessRetentionPeriod: 90
+        FailureRetentionPeriod: 180
 custom:
   hostname:
     Fn::Join:
