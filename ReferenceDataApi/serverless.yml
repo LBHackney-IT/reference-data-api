@@ -107,7 +107,7 @@ resources:
       RunConfig:
         TimeoutInSeconds: 300
         EnvironmentVariables:
-          hostname: ${self:custom.domain-name}
+          hostname: ${self:custom.hostname}
           path: /${self:provider.stage}/api/v1/healthcheck/ping
           token: ''
       ArtifactS3Location:
