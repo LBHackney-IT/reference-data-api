@@ -112,11 +112,9 @@ resources:
             token: ''
         ArtifactS3Location:
           Fn::Join:
-            - ''
-            - - s3://
-              - cw-syn-results-
+            - '-'
+            - - s3://cw-syn-results
               - Ref: 'AWS::AccountId'
-              - -
               - Ref: 'AWS::Region' 
         StartCanaryAfterCreation: True
         Schedule:
