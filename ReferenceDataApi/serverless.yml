@@ -120,8 +120,6 @@ resources:
         Schedule:
           Expression: rate(5 minutes)
           DurationInSeconds: 0
-        SuccessRetentionPeriod: 90
-        FailureRetentionPeriod: 180
 custom:
   hostname:
     Fn::Join:
