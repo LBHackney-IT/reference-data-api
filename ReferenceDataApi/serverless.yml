@@ -92,7 +92,10 @@ resources:
     Type: AWS::Synthetics::Canary
     Properties: 
       Name: ${self:service}-health
-      Code: {Handler: pageLoadBlueprint.handler, S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}, S3Key: cw-canary-api-test-script.zip}
+      Code:
+        Handler: pageLoadBlueprint.handler
+        S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
+        S3Key: cw-canary-api-test-script.zip
       ExecutionRoleArn:
         - 'Fn::Join':
             - ':'
