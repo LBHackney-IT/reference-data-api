@@ -65,10 +65,10 @@ module "elasticsearch_db_production" {
   project_name           = "reference-data-api"
   es_version             = "7.8"
   encrypt_at_rest        = "false"
-  instance_type          = "t3.small.elasticsearch"
-  instance_count         = "4"
+  instance_type          = "t3.medium.elasticsearch"
+  instance_count         = "2"
   ebs_enabled            = "true"
-  ebs_volume_size        = "30"
+  ebs_volume_size        = "50"
   region                 = data.aws_region.current.name
   account_id             = data.aws_caller_identity.current.account_id
   create_service_role    = false
