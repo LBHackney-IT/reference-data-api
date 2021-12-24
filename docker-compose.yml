@@ -24,6 +24,7 @@ services:
       dockerfile: ReferenceDataApi.Tests/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+      - SONAR_TOKEN=${SONAR_TOKEN}
     environment:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
     networks:
