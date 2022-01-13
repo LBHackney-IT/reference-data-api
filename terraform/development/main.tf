@@ -42,7 +42,7 @@ terraform {
 
 data "aws_vpc" "development_vpc" {
   tags = {
-    Name = "vpc-housing-development"
+    Name = "housing-dev"
   }
 }
 
@@ -87,4 +87,3 @@ module "reference_data_api_cloudwatch_dashboard" {
   include_dynamodb_widget = false
   no_sns_widget_dashboard = false
 }
-
