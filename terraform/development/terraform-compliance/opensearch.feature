@@ -7,10 +7,10 @@ Feature: OpenSearch is used to host the ElasticSearch clusters
     Given I have aws_elasticsearch_domain defined
     Then it must contain vpc_options
 
-  Scenario: Ensure OpenSearch clusters are encrypted at rest
-    Given I have aws_elasticsearch_domain defined
-    Then it must contain encrypt_at_rest
-    And its enabled property must be true
+# Scenario: Ensure OpenSearch clusters are encrypted at rest
+#    Given I have aws_elasticsearch_domain defined
+#    Then it must contain encrypt_at_rest
+#    And its enabled property must be true
 
   Scenario: Ensure minimum instance count is 2
     Given I have aws_elasticsearch_domain defined
