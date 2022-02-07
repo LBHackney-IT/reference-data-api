@@ -10,6 +10,9 @@ provider:
   stage: ${opt:stage}
   region: eu-west-2
 
+plugins:
+  - serverless-associate-waf
+
 package:
   artifact: ./bin/release/netcoreapp3.1/reference-data-api.zip
 
@@ -116,7 +119,7 @@ resources:
     Canary:
       Type: AWS::Synthetics::Canary
       Condition: CreateCanary
-      Properties: 
+      Properties:
         Name: reference-data-health #Update name accordingly, max 21 characters
         Code:
           Handler: pageLoadBlueprint.handler
@@ -140,12 +143,15 @@ resources:
             - '-'
             - - s3://cw-syn-results
               - Ref: 'AWS::AccountId'
-              - Ref: 'AWS::Region' 
+              - Ref: 'AWS::Region'
         StartCanaryAfterCreation: true
         Schedule:
           Expression: rate(5 minutes)
           DurationInSeconds: 0
 custom:
+  associateWaf:
+      name: ReferenceApiWafAcl
+      version: V2
   hostname:
     Fn::Join:
       - '.'
