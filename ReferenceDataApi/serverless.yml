@@ -150,7 +150,7 @@ resources:
           DurationInSeconds: 0
 custom:
   associateWaf:
-      name: ReferenceApiWafAcl
+      name: Platform_APIs_Web_ACL
       version: V2
   hostname:
     Fn::Join:
