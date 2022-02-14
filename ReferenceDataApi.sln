@@ -42,6 +42,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{66248FF2-0
 		data\elasticsearch\Dockerfile = data\elasticsearch\Dockerfile
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform-compliance", "terraform-compliance", "{C4827846-3886-401B-BB56-9E693C864DAE}"
+	ProjectSection(SolutionItems) = preProject
+		terraform\development\terraform-compliance\opensearch.feature = terraform\development\terraform-compliance\opensearch.feature
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform-compliance", "terraform-compliance", "{0199973F-5E19-4D02-87A0-02C80B6B750B}"
+	ProjectSection(SolutionItems) = preProject
+		terraform\production\terraform-compliance\opensearch.feature = terraform\production\terraform-compliance\opensearch.feature
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform-compliance", "terraform-compliance", "{8093D7BA-7DC5-4C49-A03A-61A5AC147BED}"
+	ProjectSection(SolutionItems) = preProject
+		terraform\staging\terraform-compliance\opensearch.feature = terraform\staging\terraform-compliance\opensearch.feature
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +79,9 @@ Global
 		{8D8E7751-252E-4D37-AE8D-20DA2EFC9546} = {20433368-3BCA-4986-8E19-E98EEFE0B439}
 		{01FBC8E0-9AF8-4BF9-9BA6-18446AFB3DD3} = {20433368-3BCA-4986-8E19-E98EEFE0B439}
 		{4F1C4A5C-59AF-4DDE-AC02-A4B671F8C8EF} = {20433368-3BCA-4986-8E19-E98EEFE0B439}
+		{C4827846-3886-401B-BB56-9E693C864DAE} = {8D8E7751-252E-4D37-AE8D-20DA2EFC9546}
+		{0199973F-5E19-4D02-87A0-02C80B6B750B} = {4F1C4A5C-59AF-4DDE-AC02-A4B671F8C8EF}
+		{8093D7BA-7DC5-4C49-A03A-61A5AC147BED} = {01FBC8E0-9AF8-4BF9-9BA6-18446AFB3DD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7695C85C-2C41-4EF3-9A7A-92AF54A85B54}
