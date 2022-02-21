@@ -64,7 +64,7 @@ module "elasticsearch_db_production" {
   subnet_ids             = data.aws_subnet_ids.production.ids
   project_name           = "reference-data-api"
   es_version             = "7.8"
-  encrypt_at_rest        = "false"
+  encrypt_at_rest        = "true"
   instance_type          = "t3.medium.elasticsearch"
   instance_count         = "2"
   ebs_enabled            = "true"

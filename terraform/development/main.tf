@@ -63,7 +63,7 @@ module "elasticsearch_db_development" {
   subnet_ids          = [tolist(data.aws_subnet_ids.development.ids)[0]]
   project_name        = "reference-data-api"
   es_version          = "7.8"
-  encrypt_at_rest     = "false"
+  encrypt_at_rest     = "true"
   instance_type       = "t3.small.elasticsearch"
   instance_count      = "2"
   ebs_enabled         = "true"
