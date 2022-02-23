@@ -237,6 +237,8 @@ workflows:
           context: api-assume-role-housing-development-context
       - deploy-to-development:
           context: api-nuget-token-context
+          requires:
+            - assume-role-development
 
   check-and-deploy-staging-and-production:
     jobs:
