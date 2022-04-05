@@ -30,6 +30,8 @@ RUN dotnet restore ./ReferenceDataApi.Tests/ReferenceDataApi.Tests.csproj
 # Copy everything else and build
 COPY . .
 
+RUN dotnet build -c Release -o out ReferenceDataApi/ReferenceDataApi.csproj
 RUN dotnet build -c debug -o out ReferenceDataApi.Tests/ReferenceDataApi.Tests.csproj
 
 CMD dotnet test
+RUN dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
