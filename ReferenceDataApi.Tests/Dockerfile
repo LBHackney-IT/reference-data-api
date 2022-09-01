@@ -35,6 +35,6 @@ RUN dotnet build -c debug -o out ReferenceDataApi.Tests/ReferenceDataApi.Tests.c
 
 CMD dotnet test
 
-RUN dotnet dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
+RUN dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
 
 RUN dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
