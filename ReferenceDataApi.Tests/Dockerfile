@@ -32,6 +32,4 @@ COPY . .
 
 RUN dotnet build -c debug -o out ReferenceDataApi.Tests/ReferenceDataApi.Tests.csproj
 
-CMD dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage.xml
-
-RUN dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
+CMD dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage.xml && dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
