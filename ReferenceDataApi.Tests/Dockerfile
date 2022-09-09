@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk
 RUN dotnet tool install --global dotnet-sonarscanner --version 5.6.0
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-RUN dotnet sonarscanner begin /k:"LBHackney-IT_reference-data-api" /o:"lbhackney-it" /d:sonar.host.url=https://sonarcloud.io /d:sonar.login="${SONAR_TOKEN}"
+RUN dotnet sonarscanner begin /k:"LBHackney-IT_reference-data-api" /o:"lbhackney-it" /d:sonar.host.url=https://sonarcloud.io /d:sonar.login="${SONAR_TOKEN}" /d:sonar.cs.opencover.reportsPaths=**/coverage.xml
 
 # Copy csproj and nuget config and restore as distinct layers
 COPY ./ReferenceDataApi.sln ./
@@ -32,4 +32,4 @@ COPY . .
 
 RUN dotnet build -c debug -o out ReferenceDataApi.Tests/ReferenceDataApi.Tests.csproj
 
-CMD dotnet test
+CMD dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage.xml && dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
