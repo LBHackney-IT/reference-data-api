@@ -61,7 +61,7 @@ module "elasticsearch_db_pre_production" {
   environment_name    = "pre-production"
   port                = 443
   domain_name         = "reference-data-api-es"
-  subnet_ids          = [tolist(data.aws_subnet_ids.development.ids)[0]]
+  subnet_ids          = [tolist(data.aws_subnet_ids.pre_production.ids)[0]]
   project_name        = "reference-data-api"
   es_version          = "7.8"
   encrypt_at_rest     = "true"
