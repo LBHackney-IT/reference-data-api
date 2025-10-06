@@ -168,7 +168,7 @@ jobs:
     executor: docker-python
     steps:
       - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_PRODUCTION
+          aws-account: $AWS_ACCOUNT_DISASTER_RECOVERY
   terraform-init-and-plan-development:
     executor: docker-terraform
     steps:
@@ -337,36 +337,30 @@ workflows:
       #       - "Serverless Framework"
       #     requires:
       #       - terraform-apply-staging
-      - permit-production-terraform-release:
-          type: approval
+      - assume-role-production:
+          context: api-assume-role-disaster-recovery-context
           filters:
             branches:
               only: dr-testing
-          # requires:
-          #   - build-and-test
-      - assume-role-production:
-          context: api-assume-role-disaster-recovery-context
-          requires:
-              - permit-production-terraform-release
       - terraform-init-and-plan-production:
           requires:
             - assume-role-production
-      - terraform-compliance-production:
+      - permit-production-terraform-apply:
+          type: approval
           requires:
             - terraform-init-and-plan-production
+      - terraform-compliance-production:
+          requires:
+            - permit-production-terraform-apply
       - terraform-apply-production:
           requires:
             - terraform-compliance-production
-      - permit-production-release:
-          type: approval
-          requires:
-            - terraform-apply-production
       - deploy-to-production:
           context:
             - api-nuget-token-context
             - "Serverless Framework"
           requires:
-            - permit-production-release
+            - terraform-apply-production
 
   # deploy-terraform-pre-production:
   #   jobs:
