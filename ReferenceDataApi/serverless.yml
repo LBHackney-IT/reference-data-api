@@ -140,7 +140,7 @@ resources:
 #         Schedule:
 #           Expression: rate(5 minutes)
 #           DurationInSeconds: 0
-# custom:
+custom:
   authorizerArns:
     development: arn:aws:lambda:eu-west-2:859159924354:function:api-auth-verify-token-new-development-apiauthverifytokennew
     staging:     arn:aws:lambda:eu-west-2:715003523189:function:api-auth-verify-token-new-staging-apiauthverifytokennew
