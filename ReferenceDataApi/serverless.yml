@@ -108,39 +108,39 @@ resources:
                   Action:
                     - "lambda:InvokeFunction"
                   Resource: "*"
-    Canary:
-      Type: AWS::Synthetics::Canary
-      Condition: CreateCanary
-      Properties:
-        Name: reference-data-health #Update name accordingly, max 21 characters
-        Code:
-          Handler: pageLoadBlueprint.handler
-          S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
-          S3Key: cw-canary-api-test-script.zip
-        ExecutionRoleArn:
-          Fn::Join:
-            - ':'
-            - - 'arn:aws:iam:'
-              - Ref: 'AWS::AccountId'
-              - role/LBH_Canary_Role
-        RuntimeVersion: syn-nodejs-puppeteer-9.1
-        RunConfig:
-          TimeoutInSeconds: 300
-          EnvironmentVariables:
-            hostname: ${self:custom.hostname}
-            path: /${self:provider.stage}/api/v1/healthcheck/ping
-            token: ${ssm:/housing-tl/${self:provider.stage}/reference-data-token} #Update value accordingly
-        ArtifactS3Location:
-          Fn::Join:
-            - '-'
-            - - s3://cw-syn-results
-              - Ref: 'AWS::AccountId'
-              - Ref: 'AWS::Region'
-        StartCanaryAfterCreation: true
-        Schedule:
-          Expression: rate(5 minutes)
-          DurationInSeconds: 0
-custom:
+#     Canary:
+#       Type: AWS::Synthetics::Canary
+#       Condition: CreateCanary
+#       Properties:
+#         Name: reference-data-health #Update name accordingly, max 21 characters
+#         Code:
+#           Handler: pageLoadBlueprint.handler
+#           S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
+#           S3Key: cw-canary-api-test-script.zip
+#         ExecutionRoleArn:
+#           Fn::Join:
+#             - ':'
+#             - - 'arn:aws:iam:'
+#               - Ref: 'AWS::AccountId'
+#               - role/LBH_Canary_Role
+#         RuntimeVersion: syn-nodejs-puppeteer-9.1
+#         RunConfig:
+#           TimeoutInSeconds: 300
+#           EnvironmentVariables:
+#             hostname: ${self:custom.hostname}
+#             path: /${self:provider.stage}/api/v1/healthcheck/ping
+#             token: ${ssm:/housing-tl/${self:provider.stage}/reference-data-token} #Update value accordingly
+#         ArtifactS3Location:
+#           Fn::Join:
+#             - '-'
+#             - - s3://cw-syn-results
+#               - Ref: 'AWS::AccountId'
+#               - Ref: 'AWS::Region'
+#         StartCanaryAfterCreation: true
+#         Schedule:
+#           Expression: rate(5 minutes)
+#           DurationInSeconds: 0
+# custom:
   authorizerArns:
     development: arn:aws:lambda:eu-west-2:859159924354:function:api-auth-verify-token-new-development-apiauthverifytokennew
     staging:     arn:aws:lambda:eu-west-2:715003523189:function:api-auth-verify-token-new-staging-apiauthverifytokennew
@@ -175,10 +175,10 @@ custom:
         - subnet-0ea0020a44b98a2ca
     production:
       securityGroupIds:
-        - sg-0ea24080e44e64fde
+        - sg-08b1acb08bf85654b
       subnetIds:
-        - subnet-06a697d86a9b6ed01
-        - subnet-0beb266003a56ca82
+        - subnet-05e595c59b7d6c8df
+        - subnet-0e6bc9b4ac24493cc
     pre-production:
       securityGroupIds:
         - sg-0c6335cf631b61e07
