@@ -103,13 +103,37 @@ module "reference_data_api_cloudwatch_dashboard" {
 #   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 # }
 
-/*EC2 instance to read RDS & allows session manager connections*/
-module "rds-bastion" {
-  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/session_manager_ec2"
-  vpc_id           = data.aws_vpc.production_vpc.id
-  environment_name = "production"
-  subnet_id        = sort(data.aws_subnet_ids.production.ids)[0]
-  key_name         = "PlatformApisSessionManagerKey"
-  instance_name    = "RDS jump box-Platform APIs"
-  project_name     = "platform apis"
+/*EC2 bastion instance for ElasticSearch access via Session Manager*/
+module "ec2s" {
+  source     = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
+  vpc_id     = data.aws_vpc.production_vpc.id
+  subnet_ids = data.aws_subnet_ids.production.ids
+  ec2_instances = {
+    "bastion" = {
+      "ami" = "ami-0d29e1f6d5d739940"
+      "ebs_block_devices" = {}
+      
+      # Allow all outbound traffic (needed for ElasticSearch HTTPS)
+      "egress_rules" = ["all-all"]
+      "allow_egress" = true
+
+      "ingress_cidr_blocks" = [data.aws_vpc.production_vpc.cidr_block]
+      "ingress_rules" = ["https-443-tcp", "ssh-tcp"]
+      
+      "instance_type" = "t3.micro"
+      
+      "root_block_device_volume_size" = 20
+      
+      # Install tools for ElasticSearch access
+      "user_data" = <<-EOF
+        #!/bin/bash
+        yum update -y
+        yum install -y curl jq
+        # Install AWS CLI v2
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        ./aws/install
+        EOF
+    }
+  }
 }
