@@ -46,8 +46,11 @@ data "aws_vpc" "production_vpc" {
   }
 }
 
-data "aws_subnet_ids" "production" {
-  vpc_id = data.aws_vpc.production_vpc.id
+data "aws_subnets" "production" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.production_vpc.id]
+  }
   filter {
     name   = "tag:Type"
     values = ["private"]
@@ -60,7 +63,7 @@ module "elasticsearch_db_production" {
   environment_name       = "production"
   port                   = 443
   domain_name            = "reference-data-api-es"
-  subnet_ids             = data.aws_subnet_ids.production.ids
+  subnet_ids             = data.aws_subnets.production.ids
   project_name           = "reference-data-api"
   es_version             = "7.8"
   encrypt_at_rest        = "true"
@@ -106,14 +109,18 @@ module "reference_data_api_cloudwatch_dashboard" {
 module "ec2s" {
   source = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
   tags = {
-    Application     = "reference-data-api"
-    TeamEmail       = "developmentteam@hackney.gov.uk"
-    Environment     = "prod"
-    Confidentiality = "internal"
-
+    AutomationBuildUrl = "https://circleci.com/gh/LBHackney/reference-data-api"
+    Environment        = "prod"
+    TeamEmail          = "developmentteam@hackney.gov.uk"
+    Department         = "Housing"
+    Application        = "reference-data-api"
+    Phase              = "production"
+    Stack              = "application"
+    Project            = "reference-data-api"
+    Confidentiality    = "internal"
   }
   vpc_id     = data.aws_vpc.production_vpc.id
-  subnet_ids = data.aws_subnet_ids.production.ids
+  subnet_ids = data.aws_subnets.production.ids
   ec2_instances = {
     "bastion" = {
       "ami"               = "ami-0d29e1f6d5d739940"
