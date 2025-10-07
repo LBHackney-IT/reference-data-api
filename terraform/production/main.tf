@@ -95,10 +95,21 @@ module "reference_data_api_cloudwatch_dashboard" {
 # }
 
 # module "api-alarm" {
-#   source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/cloudwatch/api-alarm"
+#   source           = "sgithub.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/cloudwatch/api-alarm"
 #   environment_name = var.environment_name
 #   api_name         = "reference-data-api"
 #   alarm_period     = "300"
 #   error_threshold  = "1"
 #   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 # }
+
+/*EC2 instance to read RDS & allows session manager connections*/
+module "rds-bastion" {
+  source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/session_manager_ec2"
+  vpc_id           = data.aws_vpc.production_vpc.id
+  environment_name = "production"
+  subnet_id        = sort(data.aws_subnet_ids.production.ids)[0]
+  key_name         = "PlatformApisSessionManagerKey"
+  instance_name    = "RDS jump box-Platform APIs"
+  project_name     = "platform apis"
+}
