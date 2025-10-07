@@ -10,7 +10,7 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
     }
   }
 }
@@ -104,25 +104,32 @@ module "reference_data_api_cloudwatch_dashboard" {
 
 /*EC2 bastion instance for ElasticSearch access via Session Manager*/
 module "ec2s" {
-  source     = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
+  source = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
+  tags = {
+    Application     = "reference-data-api"
+    TeamEmail       = "developmentteam@hackney.gov.uk"
+    Environment     = "prod"
+    Confidentiality = "internal"
+
+  }
   vpc_id     = data.aws_vpc.production_vpc.id
   subnet_ids = data.aws_subnet_ids.production.ids
   ec2_instances = {
     "bastion" = {
-      "ami" = "ami-0d29e1f6d5d739940"
+      "ami"               = "ami-0d29e1f6d5d739940"
       "ebs_block_devices" = {}
-      
+
       # Allow all outbound traffic (needed for ElasticSearch HTTPS)
       "egress_rules" = ["all-all"]
       "allow_egress" = true
 
       "ingress_cidr_blocks" = [data.aws_vpc.production_vpc.cidr_block]
-      "ingress_rules" = ["https-443-tcp", "ssh-tcp"]
-      
+      "ingress_rules"       = ["https-443-tcp", "ssh-tcp"]
+
       "instance_type" = "t3.micro"
-      
+
       "root_block_device_volume_size" = 20
-      
+
       # Install tools for ElasticSearch access
       "user_data" = <<-EOF
         #!/bin/bash
