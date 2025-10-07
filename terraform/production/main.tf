@@ -117,7 +117,7 @@ module "ec2s" {
     Phase              = "production"
     Stack              = "application"
     Project            = "reference-data-api"
-    Confidentiality    = "internal"
+    Confidentiality    = "Internal"
   }
   vpc_id     = data.aws_vpc.production_vpc.id
   subnet_ids = data.aws_subnets.production.ids
