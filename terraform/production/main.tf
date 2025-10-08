@@ -105,3 +105,23 @@ module "reference_data_api_cloudwatch_dashboard" {
 #   error_threshold  = "1"
 #   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 # }
+
+# Bastion EC2 instance
+module "ec2s" {
+  source = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
+  tags = {
+    AutomationBuildUrl = "https://circleci.com/gh/LBHackney/reference-data-api"
+    Environment        = "prod"
+    TeamEmail          = "developmentteam@hackney.gov.uk"
+    Department         = "Housing"
+    Application        = "reference-data-api"
+    Phase              = "production"
+    Stack              = "application"
+    Project            = "reference-data-api"
+    Confidentiality    = "Internal"
+  }
+  prevent_termination = false
+  vpc_id              = data.aws_vpc.production_vpc.id
+  subnet_ids          = data.aws_subnets.production.ids
+  ec2_instances = {}
+}
