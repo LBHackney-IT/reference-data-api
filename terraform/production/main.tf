@@ -104,3 +104,36 @@ module "reference_data_api_cloudwatch_dashboard" {
 #   error_threshold  = "1"
 #   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 # }
+
+/*EC2 bastion instance for ElasticSearch access via Session Manager*/
+module "ec2s" {
+  source = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
+  tags = {
+    AutomationBuildUrl = "https://circleci.com/gh/LBHackney/reference-data-api"
+    Environment        = "prod"
+    TeamEmail          = "developmentteam@hackney.gov.uk"
+    Department         = "Housing"
+    Application        = "reference-data-api"
+    Phase              = "production"
+    Stack              = "application"
+    Project            = "reference-data-api"
+    Confidentiality    = "Internal"
+  }
+  prevent_termination = false
+  vpc_id              = data.aws_vpc.production_vpc.id
+  subnet_ids          = data.aws_subnets.production.ids
+  ec2_instances = {
+    "bastion" = {
+      "ami"               = "ami-0d29e1f6d5d739940"
+      "ebs_block_devices" = {}
+
+      # Allow all outbound traffic (needed for ElasticSearch HTTPS)
+      "egress_rules" = ["all-all"]
+      "allow_egress" = true
+
+      "instance_type" = "t3.micro"
+
+      "root_block_device_volume_size" = 20
+    }
+  }
+}
