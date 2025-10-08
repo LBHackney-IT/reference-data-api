@@ -106,22 +106,62 @@ module "reference_data_api_cloudwatch_dashboard" {
 #   sns_topic_arn    = data.aws_ssm_parameter.cloudwatch_topic_arn.value
 # }
 
-# Bastion EC2 instance
-# module "ec2s" {
-#   source = "github.com/LBHackney-IT/ce-aws-ec2-lbh"
-#   tags = {
-#     AutomationBuildUrl = "https://circleci.com/gh/LBHackney/reference-data-api"
-#     Environment        = "prod"
-#     TeamEmail          = "developmentteam@hackney.gov.uk"
-#     Department         = "Housing"
-#     Application        = "reference-data-api"
-#     Phase              = "production"
-#     Stack              = "application"
-#     Project            = "reference-data-api"
-#     Confidentiality    = "Internal"
-#   }
-#   prevent_termination = false
-#   vpc_id              = data.aws_vpc.production_vpc.id
-#   subnet_ids          = data.aws_subnets.production.ids
-#   ec2_instances = {}
-# }
+data "aws_iam_instance_profile" "session_manager_profile" {
+  name = "disaster-recovery-app-prod" # Replace with the IAM role name of the bastion EC2 instance
+}
+
+# ES Snapshot Role and Policy
+resource "aws_iam_role" "es_snapshot_role" {
+  name = "es-backup-poc-snapshot-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "es.amazonaws.com" }
+    }]
+  })
+}
+resource "aws_iam_role_policy" "es_snapshot_policy" {
+  name = "es-backup-poc-snapshot-policy"
+  role = aws_iam_role.es_snapshot_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:ListBucket", "s3:GetBucketLocation"]
+      Resource = "arn:aws:s3:::lbh-housing-production-elasticsearch-backups-dr"
+    }, {
+      Effect   = "Allow"
+      Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+      Resource = "arn:aws:s3:::lbh-housing-production-elasticsearch-backups-dr/*"
+    }]
+  })
+}
+
+# Allow CircleCI deployment role & bastion role to pass the snapshot role
+resource "aws_iam_role_policy" "circleci_passrole_policy" {
+  name = "circleci-snapshot-passrole-policy"
+  role = "LBH_Circle_CI_Deployment_Role"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "iam:PassRole"
+      Resource = aws_iam_role.es_snapshot_role.arn
+    }]
+  })
+}
+resource "aws_iam_role_policy" "bastion_snapshot_passrole" {
+  name = "bastion-es-snapshot-passrole-policy"
+  role = data.aws_iam_instance_profile.session_manager_profile.role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "iam:PassRole"
+      Resource = aws_iam_role.es_snapshot_role.arn
+    }]
+  })
+}
