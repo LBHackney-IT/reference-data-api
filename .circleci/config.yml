@@ -10,7 +10,7 @@ executors:
       - image: cimg/python:3.12
   docker-terraform:
     docker:
-      - image: "hashicorp/terraform:light"
+      - image: "hashicorp/terraform:1.4.2"
   docker-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:8.0
