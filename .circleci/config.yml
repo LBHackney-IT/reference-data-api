@@ -129,7 +129,7 @@ commands:
             cd ./ReferenceDataApi/
             npm i serverless-associate-waf
             npm i @serverless/safeguards-plugin --save-dev
-            sls destroy --stage <<parameters.stage>> --verbose || true
+            sls remove --stage <<parameters.stage>>
 
 jobs:
   check-code-formatting:
