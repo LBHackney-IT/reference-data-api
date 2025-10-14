@@ -84,7 +84,7 @@ commands:
           paths:
             - .aws
   terraform-apply:
-    description: "Runs Terraform Apply"
+    description: "Runs Terraform Destroy"
     parameters:
       environment:
         type: string
@@ -95,13 +95,13 @@ commands:
           name: apply
           command: |
             cd ./terraform/<<parameters.environment>>/
-            terraform apply -auto-approve plan.out
+            terraform destroy -auto-approve
       - persist_to_workspace:
           root: *workspace_root
           paths:
             - .aws
   deploy-lambda:
-    description: "Deploys API via Serverless"
+    description: "Removes API via Serverless"
     parameters:
       stage:
         type: string
@@ -129,7 +129,7 @@ commands:
             cd ./ReferenceDataApi/
             npm i serverless-associate-waf
             npm i @serverless/safeguards-plugin --save-dev
-            sls deploy --stage <<parameters.stage>> --conceal
+            sls destroy --stage <<parameters.stage>> --verbose || true
 
 jobs:
   check-code-formatting:
