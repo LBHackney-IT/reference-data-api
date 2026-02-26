@@ -138,7 +138,6 @@ namespace ReferenceDataApi
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
             services.AddElasticSearchHealthCheck();
-            services.AddTokenFactory();
 
             RegisterGateways(services);
             RegisterUseCases(services);
