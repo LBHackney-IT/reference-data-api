@@ -3,7 +3,6 @@ using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using FluentValidation.AspNetCore;
 using Hackney.Core.HealthCheck;
-using Hackney.Core.JWT;
 using Hackney.Core.Logging;
 using Hackney.Core.Middleware.CorrelationId;
 using Hackney.Core.Middleware.Exception;
@@ -138,7 +137,7 @@ namespace ReferenceDataApi
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
             services.AddElasticSearchHealthCheck();
-            services.AddTokenFactory();
+
             RegisterGateways(services);
             RegisterUseCases(services);
         }
