@@ -3,6 +3,7 @@ using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using FluentValidation.AspNetCore;
 using Hackney.Core.HealthCheck;
+using Hackney.Core.JWT;
 using Hackney.Core.Logging;
 using Hackney.Core.Middleware.CorrelationId;
 using Hackney.Core.Middleware.Exception;
@@ -137,6 +138,10 @@ namespace ReferenceDataApi
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
             services.AddElasticSearchHealthCheck();
+            // This is actually insane design, but you have to inject this
+            // so that the logging core could log a user email! Unguessable!
+            // Also quite hard to diagnose.
+            services.AddTokenFactory();
 
             RegisterGateways(services);
             RegisterUseCases(services);

@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ReferenceDataApi/Dockerfile
       args:
-        - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
     networks:
@@ -23,16 +23,16 @@ services:
       context: .
       dockerfile: ReferenceDataApi.Tests/Dockerfile
       args:
-        - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
-        - SONAR_TOKEN=${SONAR_TOKEN}
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
+      - SONAR_TOKEN=${SONAR_TOKEN}
     environment:
       - ElasticSearchDomainUrl=http://reference-data-elasticsearch:9200
     networks:
       - elastic
     depends_on:
-      reference-data-elasticsearch:
-        condition: service_healthy
-
+      #- kibana
+      - reference-data-elasticsearch
+      
   reference-data-elasticsearch:
     image: reference-data-elasticsearch
     container_name: reference-data-elasticsearch
@@ -51,12 +51,7 @@ services:
       - reference-data-esdata-test:/usr/share/elasticsearch/data
     networks:
       - elastic
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+
   #kibana:
   #  image: docker.elastic.co/kibana/kibana:7.9.3
   #  ports:
@@ -65,10 +60,10 @@ services:
   #      - elastic
   #  depends_on:
   #      - reference-data-elasticsearch
-
+        
 volumes:
-  reference-data-esdata-test:
-    driver: local
+    reference-data-esdata-test:
+        driver: local
 
 networks:
   elastic:
