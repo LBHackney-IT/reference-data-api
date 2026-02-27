@@ -138,9 +138,8 @@ namespace ReferenceDataApi
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
             services.AddElasticSearchHealthCheck();
-            // This is actually insane design, but you have to inject this
-            // so that the logging core could log a user email! Unguessable!
-            // Also quite hard to diagnose.
+            // Token factory used by the logging middleware core package
+            // to print user email. Hidden, indirect, implicit dependency
             services.AddTokenFactory();
 
             RegisterGateways(services);
