@@ -138,6 +138,8 @@ namespace ReferenceDataApi
             services.AddLogCallAspect();
             services.ConfigureElasticSearch(Configuration);
             services.AddElasticSearchHealthCheck();
+            // Token factory used by the logging middleware core package
+            // to print user email. Hidden, indirect, implicit dependency
             services.AddTokenFactory();
 
             RegisterGateways(services);
