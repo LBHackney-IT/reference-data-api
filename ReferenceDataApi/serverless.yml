@@ -52,10 +52,11 @@ functions:
           private: false
 resources:
   Conditions:
-    # Only create the Canary for prod
+    # remove canaries temporarily
     CreateCanary:
       Fn::Equals:
-        - ${self:provider.stage}
+        #- ${self:provider.stage}
+        - "temporarily-disabled"
         - production
   Resources:
     lambdaExecutionRole:
