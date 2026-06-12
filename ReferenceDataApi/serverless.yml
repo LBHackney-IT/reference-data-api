@@ -52,11 +52,10 @@ functions:
           private: false
 resources:
   Conditions:
-    # remove canaries temporarily
+    # Only create the Canary on prod
     CreateCanary:
       Fn::Equals:
-        #- ${self:provider.stage}
-        - "temporarily-disabled"
+        - ${self:provider.stage}
         - production
   Resources:
     lambdaExecutionRole:
@@ -104,7 +103,7 @@ resources:
       Type: AWS::Synthetics::Canary
       Condition: CreateCanary
       Properties:
-        Name: reference-data-health #Update name accordingly, max 21 characters
+        Name: reference-data-health-2
         Code:
           Handler: pageLoadBlueprint.handler
           S3Bucket: lbh-cw-canaries-api-testing-script-${self:provider.stage}
