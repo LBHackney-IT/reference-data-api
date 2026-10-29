@@ -112,8 +112,6 @@ with the **Serverless Framework**. Changes are reviewed and approved on a branch
 - **`master`** — formatting, tests, then Terraform apply to development and deployment to **development**.
 - **`release`** — tests, then Terraform apply to staging and deployment to **staging**. Production follows only
   after the `permit-production-terraform-release` and `permit-production-release` manual approvals.
-- **`release`** — the separate `deploy-terraform-pre-production` and `deploy-code-pre-production` workflows
-  deploy **pre-production**, each behind its own manual approval.
 
 **Packaging and runtime:**
 
