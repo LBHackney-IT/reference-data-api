@@ -351,21 +351,6 @@ jobs:
     steps:
       - terraform-destroy-plan:
           environment: "pre-production"
-  assume-role-pre-production-destroy:
-    executor: docker-python
-    steps:
-      - *attach_workspace
-      - checkout
-      - install-jq
-      - aws_assume_role/assume_role:
-          account: $AWS_ACCOUNT_PRE_PRODUCTION
-          profile_name: default
-          role: "LBH_Circle_CI_Deployment_Role"
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - .aws
-            - destroy-plan/destroy.plan
   terraform-destroy-pre-production:
     executor: docker-terraform
     steps:
@@ -577,16 +562,9 @@ workflows:
           filters:
             branches:
               only: feat/ssi-1369-teardown-pre-production
-      - assume-role-pre-production-destroy:
-          context: api-assume-role-housing-pre-production-context
-          requires:
-            - permit-pre-production-terraform-destroy
-          filters:
-            branches:
-              only: feat/ssi-1369-teardown-pre-production
       - terraform-destroy-pre-production:
           requires:
-            - assume-role-pre-production-destroy
+            - permit-pre-production-terraform-destroy
           filters:
             branches:
               only: feat/ssi-1369-teardown-pre-production
