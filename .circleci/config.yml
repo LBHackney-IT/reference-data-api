@@ -8,6 +8,9 @@ executors:
   docker-python:
     docker:
       - image: cimg/python:3.12
+  docker-node:
+    docker:
+      - image: cimg/node:20.19
   docker-terraform:
     docker:
       - image: "hashicorp/terraform:light"
@@ -106,6 +109,77 @@ commands:
           root: *workspace_root
           paths:
             - .aws
+  remove-serverless-stack:
+    description: "Removes a Serverless stack without creating a deployment artifact"
+    parameters:
+      stage:
+        type: string
+    steps:
+      - *attach_workspace
+      - checkout
+      - run:
+          name: Install Serverless Framework v4
+          command: sudo npm install --global serverless@4
+      - run:
+          name: Remove Serverless stack
+          no_output_timeout: 45m
+          command: |
+            cd ./ReferenceDataApi/
+            sls remove --config serverless.teardown.yml --stage <<parameters.stage>> --region eu-west-2
+  terraform-destroy-plan:
+    description: "Creates a Terraform destroy plan for review before approval"
+    parameters:
+      environment:
+        type: string
+      aws-account:
+        type: string
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:rPzp7kChj9Z72jls470HfO0YvieTbdUiB+y8hlxJN8c"
+      - checkout
+      - aws_assume_role/assume_role:
+          account: <<parameters.aws-account>>
+          profile_name: default
+          role: "LBH_Circle_CI_Deployment_Role"
+      - run:
+          name: Create destroy plan
+          command: |
+            cd ./terraform/<<parameters.environment>>/
+            terraform get -update=true
+            terraform init -input=false
+            terraform plan -destroy -input=false -out=destroy.plan
+            mkdir -p ~/destroy-plan
+            cp destroy.plan ~/destroy-plan/destroy.plan
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - destroy-plan/destroy.plan
+  terraform-destroy:
+    description: "Applies the reviewed Terraform destroy plan"
+    parameters:
+      environment:
+        type: string
+      aws-account:
+        type: string
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:rPzp7kChj9Z72jls470HfO0YvieTbdUiB+y8hlxJN8c"
+      - *attach_workspace
+      - checkout
+      - aws_assume_role/assume_role:
+          account: <<parameters.aws-account>>
+          profile_name: default
+          role: "LBH_Circle_CI_Deployment_Role"
+      - run:
+          name: Destroy Terraform resources
+          no_output_timeout: 45m
+          command: |
+            cd ./terraform/<<parameters.environment>>/
+            terraform get -update=true
+            terraform init -input=false
+            terraform apply -input=false -auto-approve ~/destroy-plan/destroy.plan
   deploy-lambda:
     description: "Deploys API via Serverless"
     parameters:
@@ -261,6 +335,23 @@ jobs:
     steps:
       - deploy-lambda:
           stage: "pre-production"
+  remove-serverless-pre-production:
+    executor: docker-node
+    steps:
+      - remove-serverless-stack:
+          stage: "pre-production"
+  terraform-destroy-plan-pre-production:
+    executor: docker-terraform
+    steps:
+      - terraform-destroy-plan:
+          environment: "pre-production"
+          aws-account: $AWS_ACCOUNT_PRE_PRODUCTION
+  terraform-destroy-pre-production:
+    executor: docker-terraform
+    steps:
+      - terraform-destroy:
+          environment: "pre-production"
+          aws-account: $AWS_ACCOUNT_PRE_PRODUCTION
 
 workflows:
   check:
@@ -272,6 +363,7 @@ workflows:
               ignore:
                 - master
                 - release
+                - feat/ssi-1369-teardown-pre-production
       - build-and-test:
           context:
             - api-nuget-token-context
@@ -281,6 +373,7 @@ workflows:
               ignore:
                 - master
                 - release
+                - feat/ssi-1369-teardown-pre-production
 
   check-and-deploy-development:
     jobs:
@@ -437,3 +530,39 @@ workflows:
           filters:
             branches:
               only: release
+
+  teardown-pre-production:
+    jobs:
+      - assume-role-pre-production:
+          context: api-assume-role-housing-pre-production-context
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
+      - remove-serverless-pre-production:
+          context: "Serverless Framework"
+          requires:
+            - assume-role-pre-production
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
+      - terraform-destroy-plan-pre-production:
+          context: api-assume-role-housing-pre-production-context
+          requires:
+            - remove-serverless-pre-production
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
+      - permit-pre-production-terraform-destroy:
+          type: approval
+          requires:
+            - terraform-destroy-plan-pre-production
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
+      - terraform-destroy-pre-production:
+          context: api-assume-role-housing-pre-production-context
+          requires:
+            - permit-pre-production-terraform-destroy
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
