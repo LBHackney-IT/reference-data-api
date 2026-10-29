@@ -147,18 +147,12 @@ commands:
     parameters:
       environment:
         type: string
-      aws-account:
-        type: string
     steps:
       - add_ssh_keys:
           fingerprints:
             - "SHA256:rPzp7kChj9Z72jls470HfO0YvieTbdUiB+y8hlxJN8c"
+      - *attach_workspace
       - checkout
-      - install-jq
-      - aws_assume_role/assume_role:
-          account: <<parameters.aws-account>>
-          profile_name: default
-          role: "LBH_Circle_CI_Deployment_Role"
       - run:
           name: Create destroy plan
           command: |
@@ -171,13 +165,12 @@ commands:
       - persist_to_workspace:
           root: *workspace_root
           paths:
+            - .aws
             - destroy-plan/destroy.plan
   terraform-destroy:
     description: "Applies the reviewed Terraform destroy plan"
     parameters:
       environment:
-        type: string
-      aws-account:
         type: string
     steps:
       - add_ssh_keys:
@@ -185,11 +178,6 @@ commands:
             - "SHA256:rPzp7kChj9Z72jls470HfO0YvieTbdUiB+y8hlxJN8c"
       - *attach_workspace
       - checkout
-      - install-jq
-      - aws_assume_role/assume_role:
-          account: <<parameters.aws-account>>
-          profile_name: default
-          role: "LBH_Circle_CI_Deployment_Role"
       - run:
           name: Destroy Terraform resources
           no_output_timeout: 45m
@@ -363,13 +351,26 @@ jobs:
     steps:
       - terraform-destroy-plan:
           environment: "pre-production"
-          aws-account: $AWS_ACCOUNT_PRE_PRODUCTION
+  assume-role-pre-production-destroy:
+    executor: docker-python
+    steps:
+      - *attach_workspace
+      - checkout
+      - install-jq
+      - aws_assume_role/assume_role:
+          account: $AWS_ACCOUNT_PRE_PRODUCTION
+          profile_name: default
+          role: "LBH_Circle_CI_Deployment_Role"
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - .aws
+            - destroy-plan/destroy.plan
   terraform-destroy-pre-production:
     executor: docker-terraform
     steps:
       - terraform-destroy:
           environment: "pre-production"
-          aws-account: $AWS_ACCOUNT_PRE_PRODUCTION
 
 workflows:
   check:
@@ -564,7 +565,6 @@ workflows:
             branches:
               only: feat/ssi-1369-teardown-pre-production
       - terraform-destroy-plan-pre-production:
-          context: api-assume-role-housing-pre-production-context
           requires:
             - remove-serverless-pre-production
           filters:
@@ -577,10 +577,16 @@ workflows:
           filters:
             branches:
               only: feat/ssi-1369-teardown-pre-production
-      - terraform-destroy-pre-production:
+      - assume-role-pre-production-destroy:
           context: api-assume-role-housing-pre-production-context
           requires:
             - permit-pre-production-terraform-destroy
+          filters:
+            branches:
+              only: feat/ssi-1369-teardown-pre-production
+      - terraform-destroy-pre-production:
+          requires:
+            - assume-role-pre-production-destroy
           filters:
             branches:
               only: feat/ssi-1369-teardown-pre-production
